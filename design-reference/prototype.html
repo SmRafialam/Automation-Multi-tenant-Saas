@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AutoFlow — F-commerce Automation Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#0a0f1c;
+  --bg-2:#0e1526;
+  --surface:#131c30;
+  --surface-2:#182238;
+  --surface-3:#1e2b45;
+  --border:#243149;
+  --border-soft:#1c2740;
+  --text:#e8eef7;
+  --text-dim:#93a2bd;
+  --text-faint:#5f7091;
+  --teal:#2dd4bf;
+  --teal-2:#14b8a6;
+  --blue:#3b82f6;
+  --blue-2:#60a5fa;
+  --violet:#8b5cf6;
+  --amber:#f59e0b;
+  --green:#22c55e;
+  --red:#ef4444;
+  --pink:#ec4899;
+  --accent-grad:linear-gradient(135deg,#2dd4bf 0%,#3b82f6 100%);
+  --accent-grad-soft:linear-gradient(135deg,rgba(45,212,191,.16),rgba(59,130,246,.16));
+  --shadow:0 10px 30px -10px rgba(0,0,0,.6);
+  --shadow-lg:0 24px 60px -20px rgba(0,0,0,.7);
+  --radius:16px;
+  --radius-sm:11px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter','Hind Siliguri',system-ui,sans-serif;
+  background:radial-gradient(1200px 700px at 85% -10%,rgba(59,130,246,.14),transparent 55%),
+             radial-gradient(1000px 600px at -10% 110%,rgba(45,212,191,.12),transparent 55%),
+             var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+.bn{font-family:'Hind Siliguri','Inter',sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:20px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+a{color:inherit;text-decoration:none}
+
+/* ============ AUTH ============ */
+#auth{position:fixed;inset:0;display:grid;grid-template-columns:1.05fr .95fr;z-index:50}
+.auth-brand{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#0b1424 0%,#0d1a30 60%,#0a1f2b 100%);
+  padding:56px 60px;display:flex;flex-direction:column;justify-content:space-between;
+}
+.auth-brand::before{
+  content:"";position:absolute;width:520px;height:520px;border-radius:50%;
+  top:-140px;right:-120px;background:radial-gradient(circle,rgba(45,212,191,.35),transparent 62%);filter:blur(20px);
+}
+.auth-brand::after{
+  content:"";position:absolute;width:460px;height:460px;border-radius:50%;
+  bottom:-160px;left:-120px;background:radial-gradient(circle,rgba(59,130,246,.32),transparent 62%);filter:blur(18px);
+}
+.auth-brand>*{position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:22px;letter-spacing:-.4px}
+.logo .mark{width:40px;height:40px;border-radius:12px;background:var(--accent-grad);display:grid;place-items:center;box-shadow:0 8px 24px -6px rgba(45,212,191,.6)}
+.logo .mark svg{width:22px;height:22px}
+.auth-hero h1{font-size:44px;line-height:1.1;font-weight:800;letter-spacing:-1.2px;margin-bottom:18px}
+.auth-hero h1 span{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.auth-hero p{color:var(--text-dim);font-size:16px;max-width:440px}
+.auth-feats{display:flex;flex-direction:column;gap:14px;margin-top:30px}
+.auth-feat{display:flex;align-items:center;gap:13px;color:#c7d3e6;font-size:15px}
+.auth-feat .tick{width:26px;height:26px;border-radius:8px;background:rgba(45,212,191,.15);color:var(--teal);display:grid;place-items:center;flex:none}
+.auth-stats{display:flex;gap:36px;margin-top:8px}
+.auth-stats .s b{font-size:26px;font-weight:800;display:block}
+.auth-stats .s span{font-size:13px;color:var(--text-faint)}
+
+.auth-panel{background:var(--bg-2);display:grid;place-items:center;padding:40px}
+.auth-card{width:100%;max-width:392px}
+.auth-card h2{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+.auth-card .sub{color:var(--text-dim);margin-bottom:28px;font-size:14.5px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:7px;letter-spacing:.2px}
+.field .ip{position:relative}
+.field input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);
+  padding:13px 15px 13px 44px;border-radius:11px;font-size:14.5px;transition:.18s}
+.field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,191,.14);background:var(--surface-2)}
+.field .ip svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--text-faint)}
+.btn-primary{width:100%;background:var(--accent-grad);color:#04121a;font-weight:700;font-size:15px;
+  padding:14px;border-radius:11px;transition:.18s;box-shadow:0 10px 26px -10px rgba(45,212,191,.55)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 16px 32px -12px rgba(45,212,191,.7)}
+.btn-primary:active{transform:translateY(0)}
+.auth-alt{text-align:center;margin-top:20px;color:var(--text-dim);font-size:14px}
+.auth-alt button{color:var(--teal);font-weight:600}
+.auth-divider{display:flex;align-items:center;gap:14px;margin:22px 0;color:var(--text-faint);font-size:12.5px}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.oauth{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--surface);
+  border:1px solid var(--border);padding:12px;border-radius:11px;font-weight:600;font-size:14px;transition:.18s}
+.oauth:hover{background:var(--surface-2);border-color:var(--border)}
+
+/* ============ APP SHELL ============ */
+#app{display:none;min-height:100vh}
+.shell{display:grid;grid-template-columns:256px 1fr;min-height:100vh}
+.sidebar{background:linear-gradient(180deg,var(--bg-2),var(--bg));border-right:1px solid var(--border-soft);
+  padding:22px 16px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.side-logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;padding:6px 8px 22px;letter-spacing:-.3px}
+.side-logo .mark{width:34px;height:34px;border-radius:10px;background:var(--accent-grad);display:grid;place-items:center;flex:none}
+.side-logo .mark svg{width:19px;height:19px}
+.nav-label{font-size:10.5px;font-weight:700;letter-spacing:1.4px;color:var(--text-faint);padding:14px 12px 8px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;color:var(--text-dim);
+  font-weight:500;font-size:14.5px;transition:.15s;position:relative;margin-bottom:2px}
+.nav-item svg{width:19px;height:19px;flex:none}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:var(--accent-grad-soft);color:#fff;font-weight:600}
+.nav-item.active::before{content:"";position:absolute;left:-16px;top:50%;transform:translateY(-50%);
+  width:3px;height:22px;background:var(--teal);border-radius:0 4px 4px 0}
+.nav-item .badge{margin-left:auto;background:var(--teal);color:#04121a;font-size:11px;font-weight:700;
+  padding:2px 7px;border-radius:20px}
+.side-foot{margin-top:auto;padding-top:16px}
+.plan-card{background:linear-gradient(135deg,var(--surface-2),var(--surface));border:1px solid var(--border);
+  border-radius:14px;padding:15px}
+.plan-card .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.plan-card .tag{font-size:11px;font-weight:700;color:var(--teal);background:rgba(45,212,191,.14);padding:3px 9px;border-radius:20px}
+.plan-card p{font-size:12.5px;color:var(--text-dim);margin-bottom:11px}
+.plan-card .bar{height:6px;background:var(--surface-3);border-radius:10px;overflow:hidden;margin-bottom:9px}
+.plan-card .bar i{display:block;height:100%;width:64%;background:var(--accent-grad);border-radius:10px}
+.plan-card .up{width:100%;text-align:center;font-size:12.5px;font-weight:700;color:#04121a;background:var(--teal);padding:8px;border-radius:9px;margin-top:4px}
+
+/* ---- Topbar ---- */
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{height:68px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:18px;
+  padding:0 28px;position:sticky;top:0;background:rgba(10,15,28,.72);backdrop-filter:blur(14px);z-index:20}
+.topbar .search{flex:1;max-width:420px;position:relative}
+.topbar .search input{width:100%;background:var(--surface);border:1px solid var(--border-soft);color:var(--text);
+  padding:10px 14px 10px 40px;border-radius:10px;font-size:14px}
+.topbar .search input:focus{outline:none;border-color:var(--border)}
+.topbar .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-faint)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.icon-btn{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;color:var(--text-dim);
+  background:var(--surface);border:1px solid var(--border-soft);transition:.15s;position:relative}
+.icon-btn:hover{color:var(--text);background:var(--surface-2)}
+.icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;background:var(--teal);border-radius:50%;border:2px solid var(--bg)}
+.user-chip{display:flex;align-items:center;gap:11px;padding:5px 12px 5px 6px;border-radius:12px;background:var(--surface);
+  border:1px solid var(--border-soft);cursor:pointer;transition:.15s}
+.user-chip:hover{background:var(--surface-2)}
+.avatar{width:34px;height:34px;border-radius:9px;background:var(--accent-grad);display:grid;place-items:center;
+  font-weight:700;font-size:14px;color:#04121a;flex:none}
+.user-chip .who{line-height:1.2}
+.user-chip .who b{font-size:13.5px;font-weight:600;display:block}
+.user-chip .who span{font-size:11.5px;color:var(--text-faint)}
+
+.content{padding:28px;max-width:1320px;width:100%}
+.page{display:none;animation:fade .35s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:24px;flex-wrap:wrap}
+.page-head h1{font-size:27px;font-weight:800;letter-spacing:-.6px}
+.page-head p{color:var(--text-dim);font-size:14.5px;margin-top:4px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:11px;font-weight:600;font-size:14px;transition:.15s;white-space:nowrap}
+.btn svg{width:17px;height:17px}
+.btn.primary{background:var(--accent-grad);color:#04121a;box-shadow:0 8px 22px -10px rgba(45,212,191,.5)}
+.btn.primary:hover{transform:translateY(-1px)}
+.btn.ghost{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.sm{padding:7px 12px;font-size:13px}
+
+/* ---- Cards & grids ---- */
+.grid{display:grid;gap:18px}
+.kpis{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.kpi{position:relative;overflow:hidden}
+.kpi .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:16px}
+.kpi .ico svg{width:21px;height:21px}
+.kpi .lbl{font-size:13px;color:var(--text-dim);font-weight:500}
+.kpi .val{font-size:29px;font-weight:800;letter-spacing:-.8px;margin:3px 0 8px}
+.kpi .trend{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600}
+.trend.up{color:var(--green)}.trend.down{color:var(--red)}
+.kpi .spark{position:absolute;right:16px;bottom:14px;opacity:.85}
+.tint-teal{background:rgba(45,212,191,.14);color:var(--teal)}
+.tint-blue{background:rgba(59,130,246,.16);color:var(--blue-2)}
+.tint-violet{background:rgba(139,92,246,.16);color:#a78bfa}
+.tint-amber{background:rgba(245,158,11,.16);color:var(--amber)}
+.tint-green{background:rgba(34,197,94,.16);color:var(--green)}
+.tint-pink{background:rgba(236,72,153,.16);color:var(--pink)}
+
+.split{display:grid;grid-template-columns:1.7fr 1fr;gap:18px;margin-top:18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-head h3{font-size:16px;font-weight:700}
+.card-head .link{font-size:13px;color:var(--teal);font-weight:600}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:9px;padding:3px}
+.seg button{padding:5px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--text-dim)}
+.seg button.on{background:var(--surface-3);color:var(--text)}
+
+/* chart */
+.chart-wrap{position:relative;height:230px}
+.chart-legend{display:flex;gap:18px;margin-bottom:6px}
+.chart-legend .l{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-dim)}
+.chart-legend .l i{width:10px;height:10px;border-radius:3px;display:block}
+
+/* activity feed */
+.feed{display:flex;flex-direction:column;gap:2px}
+.feed-item{display:flex;gap:13px;padding:11px 6px;border-radius:10px;transition:.15s}
+.feed-item:hover{background:var(--surface-2)}
+.feed-item .fi{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none}
+.feed-item .fi svg{width:17px;height:17px}
+.feed-item .ft{font-size:13.5px}
+.feed-item .ft b{font-weight:600}
+.feed-item .fd{font-size:12px;color:var(--text-faint);margin-top:2px}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+thead th{text-align:left;font-size:11.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--text-faint);padding:12px 14px;border-bottom:1px solid var(--border-soft)}
+tbody td{padding:14px;border-bottom:1px solid var(--border-soft);color:var(--text)}
+tbody tr{transition:.12s}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:none}
+.cell-main{font-weight:600}
+.cell-sub{font-size:12px;color:var(--text-faint)}
+.thumb{width:38px;height:38px;border-radius:9px;object-fit:cover;background:var(--surface-3);flex:none}
+.cell-media{display:flex;align-items:center;gap:11px}
+.badge-s{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-s::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.s-pending{background:rgba(245,158,11,.14);color:var(--amber)}
+.s-processing{background:rgba(59,130,246,.15);color:var(--blue-2)}
+.s-posted,.s-delivered{background:rgba(34,197,94,.14);color:var(--green)}
+.s-shipped{background:rgba(139,92,246,.15);color:#a78bfa}
+.s-failed,.s-returned{background:rgba(239,68,68,.14);color:#f87171}
+.row-act{display:flex;gap:6px;justify-content:flex-end}
+.mini{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--surface-2);
+  border:1px solid var(--border-soft);color:var(--text-dim);transition:.15s}
+.mini:hover{color:var(--text);background:var(--surface-3)}
+.mini svg{width:15px;height:15px}
+
+/* forms in modules */
+.two-col{display:grid;grid-template-columns:.85fr 1.15fr;gap:18px;align-items:start}
+.form-grid{display:grid;gap:15px}
+.form-grid label{font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:7px;display:block}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;background:var(--surface-2);border:1px solid var(--border);
+  color:var(--text);padding:11px 13px;border-radius:10px;font-size:14px;transition:.15s}
+.form-grid input:focus,.form-grid select:focus,.form-grid textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,191,.12);background:var(--surface)}
+.form-grid textarea{resize:vertical;min-height:96px;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.ai-btn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--violet);
+  background:rgba(139,92,246,.13);padding:6px 11px;border-radius:8px;transition:.15s}
+.ai-btn:hover{background:rgba(139,92,246,.22)}
+.ai-btn svg{width:15px;height:15px}
+.caption-head{display:flex;align-items:center;justify-content:space-between}
+.uploader{border:1.5px dashed var(--border);border-radius:12px;padding:22px;text-align:center;color:var(--text-faint);
+  font-size:13px;transition:.15s;cursor:pointer}
+.uploader:hover{border-color:var(--teal);color:var(--text-dim);background:var(--surface-2)}
+.uploader svg{width:26px;height:26px;margin-bottom:8px;color:var(--text-dim)}
+.seg-type{display:flex;gap:8px}
+.seg-type button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);
+  font-size:13px;font-weight:600;color:var(--text-dim);display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s}
+.seg-type button svg{width:16px;height:16px}
+.seg-type button.on{border-color:var(--teal);background:rgba(45,212,191,.1);color:var(--teal)}
+
+/* connections */
+.conn-grid{grid-template-columns:repeat(2,1fr)}
+.conn{display:flex;flex-direction:column;gap:14px}
+.conn-top{display:flex;align-items:center;gap:14px}
+.conn-ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;flex:none}
+.conn-ico svg{width:26px;height:26px}
+.conn h3{font-size:16.5px;font-weight:700}
+.conn .desc{font-size:13px;color:var(--text-dim);margin-top:2px}
+.conn-status{margin-left:auto;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.conn-status.on{color:var(--green)}
+.conn-status.off{color:var(--text-faint)}
+.conn-status::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.conn-body{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px 15px;font-size:13px}
+.conn-body .kv{display:flex;justify-content:space-between;padding:4px 0;color:var(--text-dim)}
+.conn-body .kv b{color:var(--text);font-weight:600}
+.conn-actions{display:flex;gap:10px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(3,7,15,.72);backdrop-filter:blur(4px);z-index:80;
+  display:none;place-items:center;padding:24px;animation:fade .2s}
+.modal-bg.open{display:grid}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:520px;
+  box-shadow:var(--shadow-lg);animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--border-soft)}
+.modal-head h3{font-size:17px;font-weight:700}
+.modal-head button{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--text-dim);background:var(--surface-2)}
+.modal-head button:hover{color:var(--text)}
+.modal-body{padding:22px}
+.modal-foot{display:flex;gap:11px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--border-soft)}
+
+/* toast */
+.toasts{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:11px}
+.toast{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--border);
+  padding:13px 16px;border-radius:13px;box-shadow:var(--shadow-lg);min-width:280px;animation:slidein .3s ease;font-size:13.5px}
+@keyframes slidein{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.toast .ti{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none}
+.toast .ti svg{width:16px;height:16px}
+.toast b{font-weight:600}
+.toast small{display:block;color:var(--text-faint);font-size:12px}
+
+.empty{text-align:center;padding:40px;color:var(--text-faint)}
+.pill-count{font-size:12px;color:var(--text-faint);font-weight:600;background:var(--surface-2);padding:3px 9px;border-radius:20px}
+
+@media(max-width:1080px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .conn-grid{grid-template-columns:1fr}
+}
+@media(max-width:860px){
+  #auth{grid-template-columns:1fr}
+  .auth-brand{display:none}
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:-280px;z-index:60;transition:.25s;width:256px}
+  .sidebar.open{left:0}
+  .content{padding:18px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<section id="auth">
+  <div class="auth-brand">
+    <div class="logo">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="#04121a"/></svg></span>
+      AutoFlow
+    </div>
+    <div class="auth-hero">
+      <h1>এক জায়গা থেকে <span>পুরো ব্যবসা</span> অটোমেট করুন</h1>
+      <p class="bn">Facebook পোস্টিং, অর্ডার, কুরিয়ার আর কাস্টমার — F-commerce-এর সব automation একটাই ড্যাশবোর্ডে।</p>
+      <div class="auth-feats">
+        <div class="auth-feat bn"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span> AI ক্যাপশন সহ সোশ্যাল অটো-পোস্টিং</div>
+        <div class="auth-feat bn"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span> এক ক্লিকে Steadfast/Pathao কুরিয়ার</div>
+        <div class="auth-feat bn"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span> রিয়েল-টাইম অর্ডার ট্র্যাকিং ও রিপোর্ট</div>
+      </div>
+    </div>
+    <div class="auth-stats">
+      <div class="s"><b>২,৪০০+</b><span class="bn">শপ ব্যবহার করছে</span></div>
+      <div class="s"><b>১.২M</b><span class="bn">অর্ডার প্রসেস</span></div>
+      <div class="s"><b>৯৯.৯%</b><span>Uptime</span></div>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <h2 id="authTitle">আবার স্বাগতম 👋</h2>
+      <p class="sub bn" id="authSub">আপনার ড্যাশবোর্ডে ঢুকতে লগইন করুন</p>
+
+      <div class="field" id="nameField" style="display:none">
+        <label>ব্যবসার নাম</label>
+        <div class="ip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/></svg>
+          <input id="bizName" placeholder="যেমন: Rupkotha Fashion" />
+        </div>
+      </div>
+      <div class="field">
+        <label>ইমেইল</label>
+        <div class="ip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <input id="email" type="email" placeholder="you@business.com" value="shahriar.shuvo@ibos.io" />
+        </div>
+      </div>
+      <div class="field">
+        <label>পাসওয়ার্ড</label>
+        <div class="ip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input id="password" type="password" placeholder="••••••••" value="demopass" />
+        </div>
+      </div>
+
+      <button class="btn-primary" id="authBtn" onclick="doAuth()">লগইন করুন</button>
+
+      <div class="auth-divider">অথবা</div>
+      <button class="oauth" onclick="doAuth()">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.2-4.8 3.2-7.8Z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.6l-3.6-2.7c-1 .7-2.3 1.1-3.6 1.1-2.8 0-5.1-1.9-6-4.4H2.3v2.8A11 11 0 0 0 12 23Z"/><path fill="#FBBC05" d="M6 14.4a6.6 6.6 0 0 1 0-4.2V7.4H2.3a11 11 0 0 0 0 9.8L6 14.4Z"/><path fill="#EA4335" d="M12 5.5c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 2.3 7.4L6 10.2c.9-2.6 3.2-4.7 6-4.7Z"/></svg>
+        Google দিয়ে চালিয়ে যান
+      </button>
+
+      <p class="auth-alt bn" id="authAlt">অ্যাকাউন্ট নেই? <button onclick="toggleAuth()">সাইন আপ করুন</button></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <div class="shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="side-logo">
+        <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="#04121a"/></svg></span>
+        AutoFlow
+      </div>
+      <div class="nav-label">Menu</div>
+      <a class="nav-item active" data-page="dashboard" onclick="go('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        ড্যাশবোর্ড
+      </a>
+      <a class="nav-item" data-page="posting" onclick="go('posting')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3V4Z"/><path d="M8 9h8M8 12h5"/></svg>
+        সোশ্যাল পোস্টিং
+      </a>
+      <a class="nav-item" data-page="orders" onclick="go('orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 4 6v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4H6Z"/><path d="M4 6h16M9 10a3 3 0 0 0 6 0"/></svg>
+        অর্ডার ও কুরিয়ার
+        <span class="badge" id="ordersBadge">3</span>
+      </a>
+      <a class="nav-item" data-page="connections" onclick="go('connections')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12a3 3 0 0 0 3 3l3-3a3 3 0 0 0-4.2-4.2L11 9"/><path d="M15 12a3 3 0 0 0-3-3l-3 3a3 3 0 0 0 4.2 4.2L13 15"/></svg>
+        কানেকশন
+      </a>
+      <div class="nav-label">Phase 2</div>
+      <a class="nav-item" onclick="toast('info','শীঘ্রই আসছে','WhatsApp Bot Phase 2-এ আসবে')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.7 7.4L3 21l2.1-5.3A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+        WhatsApp Bot
+      </a>
+      <a class="nav-item" onclick="toast('info','শীঘ্রই আসছে','Reports Phase 2-এ আসবে')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        রিপোর্ট
+      </a>
+
+      <div class="side-foot">
+        <div class="plan-card">
+          <div class="row">
+            <b style="font-size:14px">Business Plan</b>
+            <span class="tag">Active</span>
+          </div>
+          <p class="bn">৩২০ / ৫০০ পোস্ট এই মাসে</p>
+          <div class="bar"><i></i></div>
+          <button class="up bn" onclick="toast('info','Upgrade','Pro প্ল্যানে WhatsApp + রিপোর্ট পাবেন')">Pro-তে আপগ্রেড</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn" style="display:none" id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input placeholder="অর্ডার, পোস্ট বা কাস্টমার খুঁজুন..." />
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" onclick="toast('info','নোটিফিকেশন','৩টি নতুন অর্ডার এসেছে')"><span class="dot"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          </button>
+          <button class="icon-btn" onclick="toast('info','হেল্প','সাপোর্ট টিম ২৪/৭ আছে')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 2.5M12 17h.01"/></svg>
+          </button>
+          <div class="user-chip" onclick="logout()">
+            <div class="avatar" id="avatarInit">SS</div>
+            <div class="who"><b id="bizLabel">Rupkotha Fashion</b><span id="emailLabel">shahriar.shuvo@ibos.io</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- ============ DASHBOARD ============ -->
+        <section class="page active" id="page-dashboard">
+          <div class="page-head">
+            <div>
+              <h1 class="bn">স্বাগতম, শাহরিয়ার 👋</h1>
+              <p class="bn">আজ আপনার ব্যবসার এক নজরে অবস্থা — <span id="today"></span></p>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn ghost bn" onclick="go('posting')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3V4Z"/></svg>নতুন পোস্ট</button>
+              <button class="btn primary bn" onclick="openOrderModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>নতুন অর্ডার</button>
+            </div>
+          </div>
+
+          <div class="grid kpis">
+            <div class="card kpi">
+              <div class="ico tint-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="lbl bn">আজকের বিক্রি</div>
+              <div class="val">৳৪২,৮৫০</div>
+              <span class="trend up"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M9 7h8v8"/></svg>+১৮.২%</span>
+              <span class="spark" id="spark1"></span>
+            </div>
+            <div class="card kpi">
+              <div class="ico tint-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 4 6v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4H6ZM4 6h16M9 10a3 3 0 0 0 6 0"/></svg></div>
+              <div class="lbl bn">নতুন অর্ডার</div>
+              <div class="val">৩৮</div>
+              <span class="trend up"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M9 7h8v8"/></svg>+৭ আজ</span>
+              <span class="spark" id="spark2"></span>
+            </div>
+            <div class="card kpi">
+              <div class="ico tint-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3V4Z"/></svg></div>
+              <div class="lbl bn">শিডিউল পোস্ট</div>
+              <div class="val">১২</div>
+              <span class="trend up"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M9 7h8v8"/></svg>এই সপ্তাহে</span>
+              <span class="spark" id="spark3"></span>
+            </div>
+            <div class="card kpi">
+              <div class="ico tint-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+              <div class="lbl bn">মোট কাস্টমার</div>
+              <div class="val">১,৪২০</div>
+              <span class="trend up"><svg viewBox="0 0 24 24" width="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M9 7h8v8"/></svg>+৩৪ এই মাসে</span>
+              <span class="spark" id="spark4"></span>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3 class="bn">বিক্রি ও অর্ডার</h3>
+                  <div class="chart-legend" style="margin-top:8px">
+                    <span class="l"><i style="background:#2dd4bf"></i> বিক্রি (৳)</span>
+                    <span class="l"><i style="background:#3b82f6"></i> অর্ডার</span>
+                  </div>
+                </div>
+                <div class="seg">
+                  <button class="on">সপ্তাহ</button><button>মাস</button><button>বছর</button>
+                </div>
+              </div>
+              <div class="chart-wrap" id="mainChart"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3 class="bn">সাম্প্রতিক কার্যকলাপ</h3><span class="link bn">সব দেখুন</span></div>
+              <div class="feed">
+                <div class="feed-item"><div class="fi tint-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div><div class="ft bn"><b>অর্ডার #১০৪২</b> Steadfast-এ পাঠানো হয়েছে</div><div class="fd">২ মিনিট আগে</div></div></div>
+                <div class="feed-item"><div class="fi tint-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3V4Z"/></svg></div><div><div class="ft bn"><b>ঈদ কালেকশন</b> পোস্ট Facebook-এ লাইভ</div><div class="fd">২৫ মিনিট আগে</div></div></div>
+                <div class="feed-item"><div class="fi tint-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><div><div class="ft bn"><b>নতুন কাস্টমার</b> তানিয়া আক্তার যুক্ত হয়েছে</div><div class="fd">১ ঘণ্টা আগে</div></div></div>
+                <div class="feed-item"><div class="fi tint-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div><div><div class="ft bn"><b>AI ক্যাপশন</b> ৩টি পোস্টের জন্য তৈরি</div><div class="fd">৩ ঘণ্টা আগে</div></div></div>
+                <div class="feed-item"><div class="fi tint-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><div><div class="ft bn"><b>অর্ডার #১০৩৮</b> ডেলিভার্ড হয়েছে</div><div class="fd">৫ ঘণ্টা আগে</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:18px">
+            <div class="card-head"><h3 class="bn">সাম্প্রতিক অর্ডার</h3><button class="link bn" onclick="go('orders')">সব অর্ডার →</button></div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>অর্ডার</th><th>কাস্টমার</th><th>এমাউন্ট</th><th>কুরিয়ার</th><th>স্ট্যাটাস</th></tr></thead>
+                <tbody id="dashOrders"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SOCIAL POSTING ============ -->
+        <section class="page" id="page-posting">
+          <div class="page-head">
+            <div><h1 class="bn">সোশ্যাল পোস্টিং</h1><p class="bn">পোস্ট তৈরি করুন, শিডিউল করুন — Facebook-এ অটো পাবলিশ হবে</p></div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-head"><h3 class="bn">নতুন পোস্ট তৈরি</h3></div>
+              <div class="form-grid">
+                <div>
+                  <label class="bn">মিডিয়া টাইপ</label>
+                  <div class="seg-type" id="mediaType">
+                    <button class="on" data-t="image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>ছবি</button>
+                    <button data-t="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="m16 9 6-3v12l-6-3"/></svg>ভিডিও</button>
+                    <button data-t="multi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="14" height="14" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/></svg>মাল্টি</button>
+                  </div>
+                </div>
+                <div class="uploader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><div class="bn">মিডিয়া আপলোড করুন বা লিংক দিন</div><div style="font-size:11.5px;margin-top:3px">ভিডিওর জন্য সরাসরি .mp4 লিংক (YouTube/Drive নয়)</div></div>
+                <div>
+                  <div class="caption-head"><label class="bn">ক্যাপশন</label>
+                    <button class="ai-btn" onclick="genCaption()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 13.9 8.6 20 9.3l-4.5 4 1.3 6-4.8-3.2L7.2 19.3l1.3-6L4 9.3l6.1-.7L12 3Z"/></svg>AI ক্যাপশন</button>
+                  </div>
+                  <textarea id="captionBox" class="bn" placeholder="প্রোডাক্ট সম্পর্কে লিখুন, অথবা AI দিয়ে জেনারেট করুন..."></textarea>
+                </div>
+                <div class="row2">
+                  <div><label class="bn">শিডিউল তারিখ</label><input type="date" id="postDate" /></div>
+                  <div><label class="bn">সময়</label><input type="time" id="postTime" value="19:00" /></div>
+                </div>
+                <button class="btn primary bn" style="justify-content:center" onclick="addPost()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg>পোস্ট শিডিউল করুন</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3 class="bn">শিডিউল করা পোস্ট <span class="pill-count" id="postCount"></span></h3>
+                <div class="seg"><button class="on">সব</button><button>Pending</button><button>Posted</button></div>
+              </div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead><tr><th>পোস্ট</th><th>সময়</th><th>স্ট্যাটাস</th><th></th></tr></thead>
+                  <tbody id="postsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ ORDERS ============ -->
+        <section class="page" id="page-orders">
+          <div class="page-head">
+            <div><h1 class="bn">অর্ডার ও কুরিয়ার</h1><p class="bn">অর্ডার ম্যানেজ করুন আর এক ক্লিকে Steadfast-এ পাঠান</p></div>
+            <button class="btn primary bn" onclick="openOrderModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>নতুন অর্ডার</button>
+          </div>
+
+          <div class="grid kpis" style="margin-bottom:18px">
+            <div class="card kpi"><div class="ico tint-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl bn">পেন্ডিং</div><div class="val" id="stPending">0</div></div>
+            <div class="card kpi"><div class="ico tint-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h13v13H1zM14 8h5l3 3v5h-8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="lbl bn">শিপড</div><div class="val" id="stShipped">0</div></div>
+            <div class="card kpi"><div class="ico tint-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><div class="lbl bn">ডেলিভার্ড</div><div class="val" id="stDelivered">0</div></div>
+            <div class="card kpi"><div class="ico tint-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="lbl bn">মোট এমাউন্ট</div><div class="val" id="stAmount">৳0</div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3 class="bn">সব অর্ডার <span class="pill-count" id="orderCount"></span></h3>
+              <div class="seg"><button class="on">সব</button><button>Pending</button><button>Shipped</button><button>Delivered</button></div>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>অর্ডার / আইটেম</th><th>কাস্টমার</th><th>এমাউন্ট</th><th>ট্র্যাকিং</th><th>স্ট্যাটাস</th><th></th></tr></thead>
+                <tbody id="ordersBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ CONNECTIONS ============ -->
+        <section class="page" id="page-connections">
+          <div class="page-head">
+            <div><h1 class="bn">কানেকশন</h1><p class="bn">আপনার অ্যাকাউন্টগুলো যুক্ত করুন — সব automation এখান থেকে চলবে</p></div>
+          </div>
+          <div class="grid conn-grid" id="connGrid"></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="modal-bg" id="orderModal">
+  <div class="modal">
+    <div class="modal-head"><h3 class="bn">নতুন অর্ডার</h3><button onclick="closeModal('orderModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="row2">
+          <div><label class="bn">কাস্টমারের নাম</label><input id="oName" placeholder="যেমন: তানিয়া আক্তার" /></div>
+          <div><label class="bn">ফোন</label><input id="oPhone" placeholder="017XXXXXXXX" /></div>
+        </div>
+        <div><label class="bn">ঠিকানা</label><input id="oAddr" placeholder="বাসা, রোড, এলাকা, জেলা" /></div>
+        <div class="row2">
+          <div><label class="bn">আইটেম</label><input id="oItems" placeholder="যেমন: থ্রি-পিস (M) x1" /></div>
+          <div><label class="bn">এমাউন্ট (৳)</label><input id="oAmount" type="number" placeholder="1250" /></div>
+        </div>
+        <div><label class="bn">কুরিয়ার</label>
+          <select id="oCourier"><option value="steadfast">Steadfast</option><option value="pathao">Pathao</option><option value="redx">RedX</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost bn" onclick="closeModal('orderModal')">বাতিল</button>
+      <button class="btn primary bn" onclick="addOrder()">অর্ডার সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ---------- helpers ---------- */
+function spark(data,color){
+  const w=70,h=26,max=Math.max(...data),min=Math.min(...data);
+  const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-min)/(max-min||1))*(h-4)-2}`).join(' ');
+  return `<svg width="${w}" height="${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/></svg>`;
+}
+const bn=n=>n.toString().replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d]);
+const money=n=>'৳'+bn(n.toLocaleString('en-US'));
+
+/* ---------- auth ---------- */
+let isSignup=false;
+function toggleAuth(){
+  isSignup=!isSignup;
+  document.getElementById('nameField').style.display=isSignup?'block':'none';
+  document.getElementById('authTitle').textContent=isSignup?'অ্যাকাউন্ট তৈরি করুন 🚀':'আবার স্বাগতম 👋';
+  document.getElementById('authSub').textContent=isSignup?'৩০ সেকেন্ডে শুরু করুন, কার্ড লাগবে না':'আপনার ড্যাশবোর্ডে ঢুকতে লগইন করুন';
+  document.getElementById('authBtn').textContent=isSignup?'সাইন আপ করুন':'লগইন করুন';
+  document.getElementById('authAlt').innerHTML=isSignup?'অ্যাকাউন্ট আছে? <button onclick="toggleAuth()">লগইন করুন</button>':'অ্যাকাউন্ট নেই? <button onclick="toggleAuth()">সাইন আপ করুন</button>';
+}
+function doAuth(){
+  const biz=document.getElementById('bizName').value.trim()||'Rupkotha Fashion';
+  const email=document.getElementById('email').value.trim()||'shahriar.shuvo@ibos.io';
+  document.getElementById('bizLabel').textContent=biz;
+  document.getElementById('emailLabel').textContent=email;
+  document.getElementById('avatarInit').textContent=(biz[0]||'A').toUpperCase()+(biz.split(' ')[1]?.[0]||'F').toUpperCase();
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='block';
+  render();
+  setTimeout(()=>toast('success','লগইন সফল','স্বাগতম আপনার AutoFlow ড্যাশবোর্ডে'),400);
+}
+function logout(){
+  if(!confirm('লগআউট করবেন?'))return;
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='grid';
+}
+
+/* ---------- navigation ---------- */
+function go(page){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  window.scrollTo(0,0);
+}
+
+/* ---------- data ---------- */
+let posts=[
+  {id:1049,caption:'ঈদ স্পেশাল কালেকশন — নতুন থ্রি-পিস এসে গেছে! 🌙 সীমিত স্টক।',type:'image',time:'আজ, ৭:০০ PM',status:'pending'},
+  {id:1048,caption:'গরমে আরাম — সুতির কুর্তি কালেকশন এখন ২০% ছাড়ে ☀️',type:'multi',time:'আজ, ৩:০০ PM',status:'posted'},
+  {id:1047,caption:'নতুন শাড়ির রিল — কমেন্টে দাম জানতে চান? 👇',type:'video',time:'গতকাল, ৮:০০ PM',status:'posted'},
+  {id:1046,caption:'উইকেন্ড অফার — যেকোনো ২টি কিনলে ফ্রি ডেলিভারি! 🚚',type:'image',time:'গতকাল, ১১:০০ AM',status:'failed'},
+];
+let orders=[
+  {id:1042,items:'থ্রি-পিস (M) x1',name:'তানিয়া আক্তার',phone:'01712345678',amount:1250,courier:'steadfast',track:'SF-88213',status:'shipped'},
+  {id:1041,items:'কুর্তি (L) x2',name:'রুমানা পারভীন',phone:'01898765432',amount:1800,courier:'pathao',track:'PA-40021',status:'delivered'},
+  {id:1040,items:'শাড়ি (জামদানি) x1',name:'নুসরাত জাহান',phone:'01655544332',amount:3200,courier:'steadfast',track:'',status:'pending'},
+  {id:1039,items:'পাঞ্জাবি (XL) x1',name:'সাকিব হাসান',phone:'01911223344',amount:1450,courier:'redx',track:'RX-11902',status:'shipped'},
+  {id:1038,items:'বেবি ড্রেস x3',name:'ফারিয়া ইসলাম',phone:'01777889900',amount:2100,courier:'steadfast',track:'SF-88120',status:'delivered'},
+  {id:1037,items:'গহনা সেট x1',name:'মিথিলা রহমান',phone:'01633221100',amount:950,courier:'pathao',track:'',status:'pending'},
+];
+const connections=[
+  {key:'facebook',name:'Facebook Page',desc:'পোস্ট অটো-পাবলিশ ও কমেন্ট',tint:'tint-blue',on:true,info:{'Page':'Rupkotha Fashion','Page ID':'104829...','Token':'Valid • ৫৮ দিন বাকি'},
+    icon:'<path d="M17 2h-3a5 5 0 0 0-5 5v3H6v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>'},
+  {key:'steadfast',name:'Steadfast Courier',desc:'অর্ডার পাঠানো ও ট্র্যাকিং',tint:'tint-teal',on:true,info:{'Merchant':'Rupkotha','API Key':'••••••3f9a','স্ট্যাটাস':'সক্রিয়'},
+    icon:'<path d="M1 3h13v13H1zM14 8h5l3 3v5h-8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>'},
+  {key:'sheet',name:'Google Sheet',desc:'অর্ডার ও কাস্টমার সিংক',tint:'tint-green',on:false,info:{'Sheet ID':'যুক্ত করা হয়নি'},
+    icon:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>'},
+  {key:'whatsapp',name:'WhatsApp Cloud',desc:'অর্ডার কনফার্মেশন মেসেজ (Phase 2)',tint:'tint-green',on:false,info:{'স্ট্যাটাস':'শীঘ্রই আসছে'},
+    icon:'<path d="M21 11.5a8.5 8.5 0 0 1-12.7 7.4L3 21l2.1-5.3A8.5 8.5 0 1 1 21 11.5Z"/>'},
+];
+const captions=[
+  'নতুন কালেকশন এসে গেছে! ✨ সীমিত স্টক, আজই অর্ডার করুন। ইনবক্সে দাম জানতে মেসেজ দিন 📩\n\n#fashion #bdshopping #eidcollection #dhaka',
+  'কোয়ালিটি নিয়ে কোনো কম্প্রোমাইজ নয় 💯 প্রিমিয়াম ফেব্রিক, হাতে বানানো ডিজাইন। সারা দেশে হোম ডেলিভারি 🚚\n\n#handmade #premiumquality #freeDelivery',
+  'আপনার পছন্দের রঙে, আপনার সাইজে 🌸 এখনই বুক করুন — স্টক শেষ হওয়ার আগে!\n\n#customorder #bdfashion #onlineshopbd',
+];
+
+/* ---------- render ---------- */
+const typeIcon={image:'ছবি',video:'ভিডিও',multi:'মাল্টি'};
+function statusBn(s){return {pending:'পেন্ডিং',processing:'প্রসেসিং',posted:'পোস্টেড',shipped:'শিপড',delivered:'ডেলিভার্ড',failed:'ব্যর্থ',returned:'রিটার্ন'}[s]||s;}
+const courierName={steadfast:'Steadfast',pathao:'Pathao',redx:'RedX'};
+
+function render(){
+  renderDashOrders();renderPosts();renderOrders();renderConn();renderChart();
+  document.getElementById('spark1').innerHTML=spark([8,11,9,14,12,18,22],'#2dd4bf');
+  document.getElementById('spark2').innerHTML=spark([5,7,6,9,8,7,11],'#60a5fa');
+  document.getElementById('spark3').innerHTML=spark([3,4,4,6,5,7,6],'#a78bfa');
+  document.getElementById('spark4').innerHTML=spark([10,12,13,15,17,19,22],'#f59e0b');
+  document.getElementById('today').textContent=new Date().toLocaleDateString('bn-BD',{weekday:'long',day:'numeric',month:'long'});
+  const d=new Date();document.getElementById('postDate').value=d.toISOString().slice(0,10);
+}
+
+function renderDashOrders(){
+  document.getElementById('dashOrders').innerHTML=orders.slice(0,4).map(o=>`
+    <tr><td class="cell-main">#${bn(o.id)}</td>
+    <td>${o.name}<div class="cell-sub">${o.phone}</div></td>
+    <td class="cell-main">${money(o.amount)}</td>
+    <td>${courierName[o.courier]}</td>
+    <td><span class="badge-s s-${o.status}">${statusBn(o.status)}</span></td></tr>`).join('');
+}
+
+function renderPosts(){
+  document.getElementById('postCount').textContent=bn(posts.length)+' টি';
+  document.getElementById('postsBody').innerHTML=posts.map(p=>`
+    <tr><td><div class="cell-media"><div class="thumb" style="display:grid;place-items:center;color:var(--text-faint)">
+      ${p.type==='video'?'<svg width=16 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 3 14 9-14 9V3Z"/></svg>':p.type==='multi'?'<svg width=16 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="14" height="14" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/></svg>':'<svg width=16 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>'}
+      </div><div><div class="cell-main" style="max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.caption}</div><div class="cell-sub">${typeIcon[p.type]} পোস্ট</div></div></div></td>
+    <td>${p.time}</td>
+    <td><span class="badge-s s-${p.status}">${statusBn(p.status)}</span></td>
+    <td class="row-act">${p.status==='pending'?`<button class="mini" title="এখনই পোস্ট" onclick="publishNow(${p.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 3 14 9-14 9V3Z"/></svg></button>`:''}
+      <button class="mini" title="ডিলিট" onclick="delPost(${p.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m-9 0v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6"/></svg></button></td></tr>`).join('');
+}
+
+function renderOrders(){
+  const body=document.getElementById('ordersBody');
+  document.getElementById('orderCount').textContent=bn(orders.length)+' টি';
+  body.innerHTML=orders.map(o=>`
+    <tr><td><div class="cell-main">#${bn(o.id)}</div><div class="cell-sub">${o.items}</div></td>
+    <td>${o.name}<div class="cell-sub">${o.phone}</div></td>
+    <td class="cell-main">${money(o.amount)}</td>
+    <td>${o.track?`<span class="cell-sub">${courierName[o.courier]}</span><br>${o.track}`:'<span class="cell-sub">—</span>'}</td>
+    <td><span class="badge-s s-${o.status}">${statusBn(o.status)}</span></td>
+    <td class="row-act">${o.status==='pending'?`<button class="btn primary sm bn" onclick="sendCourier(${o.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg>Steadfast</button>`:`<button class="mini" title="ট্র্যাক" onclick="toast('info','ট্র্যাকিং','${o.track||'—'} — ${statusBn(o.status)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8Z"/></svg></button>`}</td></tr>`).join('');
+  // stats
+  const cnt=s=>orders.filter(o=>o.status===s).length;
+  document.getElementById('stPending').textContent=bn(cnt('pending'));
+  document.getElementById('stShipped').textContent=bn(cnt('shipped'));
+  document.getElementById('stDelivered').textContent=bn(cnt('delivered'));
+  document.getElementById('stAmount').textContent=money(orders.reduce((a,o)=>a+o.amount,0));
+  document.getElementById('ordersBadge').textContent=bn(cnt('pending'));
+}
+
+function renderConn(){
+  document.getElementById('connGrid').innerHTML=connections.map(c=>`
+    <div class="card conn">
+      <div class="conn-top">
+        <div class="conn-ico ${c.tint}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${c.icon}</svg></div>
+        <div><h3>${c.name}</h3><div class="desc bn">${c.desc}</div></div>
+        <div class="conn-status ${c.on?'on':'off'} bn">${c.on?'সংযুক্ত':'সংযুক্ত নয়'}</div>
+      </div>
+      <div class="conn-body">${Object.entries(c.info).map(([k,v])=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('')}</div>
+      <div class="conn-actions">
+        ${c.on?`<button class="btn ghost sm bn" onclick="toast('info','${c.name}','সেটিংস আপডেট করুন')">ম্যানেজ</button><button class="btn ghost sm bn" onclick="toggleConn('${c.key}')">ডিসকানেক্ট</button>`
+        :`<button class="btn primary sm bn" onclick="toggleConn('${c.key}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12a3 3 0 0 0 3 3l3-3a3 3 0 0 0-4.2-4.2L11 9"/></svg>যুক্ত করুন</button>`}
+      </div>
+    </div>`).join('');
+}
+function toggleConn(k){
+  const c=connections.find(x=>x.key===k);
+  if(k==='whatsapp'){toast('info','শীঘ্রই আসছে','WhatsApp Phase 2-এ পাওয়া যাবে');return;}
+  c.on=!c.on;
+  if(c.on&&k==='sheet')c.info={'Sheet ID':'1aBcD...','স্ট্যাটাস':'সিংক চালু'};
+  renderConn();
+  toast(c.on?'success':'info',c.name,c.on?'সফলভাবে সংযুক্ত হয়েছে':'সংযোগ বিচ্ছিন্ন হয়েছে');
+}
+
+/* ---------- chart ---------- */
+function renderChart(){
+  const el=document.getElementById('mainChart');
+  const sales=[28,34,30,42,38,52,48], ord=[18,24,20,30,26,38,34];
+  const days=['শনি','রবি','সোম','মঙ্গল','বুধ','বৃহ','শুক্র'];
+  const W=el.clientWidth||620,H=230,pad=30,maxS=60;
+  const x=i=>pad+i*((W-pad*2)/(sales.length-1));
+  const yS=v=>H-pad-(v/maxS)*(H-pad*2);
+  const line=(d,c)=>d.map((v,i)=>`${x(i)},${yS(v)}`).join(' ');
+  const area=`M${x(0)},${yS(sales[0])} `+sales.map((v,i)=>`L${x(i)},${yS(v)}`).join(' ')+` L${x(sales.length-1)},${H-pad} L${x(0)},${H-pad} Z`;
+  el.innerHTML=`<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="overflow:visible">
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2dd4bf" stop-opacity=".28"/><stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/></linearGradient></defs>
+    ${[0,1,2,3].map(i=>{const y=pad+i*((H-pad*2)/3);return `<line x1="${pad}" y1="${y}" x2="${W-pad}" y2="${y}" stroke="#243149" stroke-width="1" stroke-dasharray="4 5"/>`}).join('')}
+    <path d="${area}" fill="url(#ag)"/>
+    <polyline points="${line(sales)}" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="${line(ord)}" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${sales.map((v,i)=>`<circle cx="${x(i)}" cy="${yS(v)}" r="3.5" fill="#0a0f1c" stroke="#2dd4bf" stroke-width="2"/>`).join('')}
+    ${days.map((d,i)=>`<text x="${x(i)}" y="${H-8}" fill="#5f7091" font-size="11" text-anchor="middle" font-family="Hind Siliguri">${d}</text>`).join('')}
+  </svg>`;
+}
+window.addEventListener('resize',()=>{if(document.getElementById('app').style.display==='block')renderChart();});
+
+/* ---------- actions ---------- */
+function genCaption(){
+  const box=document.getElementById('captionBox');
+  box.value='✨ AI লিখছে...';
+  setTimeout(()=>{box.value=captions[Math.floor(Math.random()*captions.length)];toast('ai','AI ক্যাপশন তৈরি','পছন্দমতো এডিট করে নিন');},700);
+}
+let curType='image';
+document.getElementById('mediaType').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  document.querySelectorAll('#mediaType button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');curType=b.dataset.t;
+});
+function addPost(){
+  const cap=document.getElementById('captionBox').value.trim();
+  if(!cap){toast('error','ক্যাপশন দিন','পোস্টের জন্য ক্যাপশন লিখুন');return;}
+  const t=document.getElementById('postTime').value;
+  posts.unshift({id:1050+posts.length,caption:cap,type:curType,time:'আজ, '+t,status:'pending'});
+  document.getElementById('captionBox').value='';
+  renderPosts();
+  toast('success','পোস্ট শিডিউল হয়েছে','cron চললে Facebook-এ অটো পাবলিশ হবে');
+}
+function publishNow(id){
+  const p=posts.find(x=>x.id===id);p.status='processing';renderPosts();
+  toast('info','পাবলিশ হচ্ছে...','Facebook Graph API-তে পাঠানো হচ্ছে');
+  setTimeout(()=>{p.status='posted';renderPosts();toast('success','পোস্ট লাইভ!','Facebook Page-এ সফলভাবে পোস্ট হয়েছে');},1400);
+}
+function delPost(id){posts=posts.filter(p=>p.id!==id);renderPosts();toast('info','ডিলিট হয়েছে','পোস্টটি সরানো হয়েছে');}
+
+function sendCourier(id){
+  const o=orders.find(x=>x.id===id);
+  toast('info','Steadfast-এ পাঠানো হচ্ছে...','অর্ডার তথ্য সাবমিট হচ্ছে');
+  setTimeout(()=>{o.status='shipped';o.track='SF-'+bn(80000+Math.floor(Math.random()*9999));renderOrders();renderDashOrders();
+    toast('success','কুরিয়ারে পাঠানো হয়েছে',`ট্র্যাকিং: ${o.track}`);},1300);
+}
+function openOrderModal(){document.getElementById('orderModal').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function addOrder(){
+  const n=document.getElementById('oName').value.trim();
+  const amt=+document.getElementById('oAmount').value;
+  if(!n||!amt){toast('error','তথ্য অসম্পূর্ণ','নাম আর এমাউন্ট দিন');return;}
+  orders.unshift({id:1043+orders.length,items:document.getElementById('oItems').value||'আইটেম',name:n,
+    phone:document.getElementById('oPhone').value||'—',amount:amt,courier:document.getElementById('oCourier').value,track:'',status:'pending'});
+  ['oName','oPhone','oAddr','oItems','oAmount'].forEach(i=>document.getElementById(i).value='');
+  closeModal('orderModal');renderOrders();renderDashOrders();
+  toast('success','অর্ডার যুক্ত হয়েছে','এখন কুরিয়ারে পাঠাতে পারেন');
+}
+
+/* ---------- toast ---------- */
+function toast(type,title,msg){
+  const map={success:['tint-green','<path d="M20 6 9 17l-5-5"/>'],error:['tint-pink','<path d="M18 6 6 18M6 6l12 12"/>'],
+    info:['tint-blue','<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>'],ai:['tint-violet','<path d="M12 3 13.9 8.6 20 9.3l-4.5 4 1.3 6-4.8-3.2L7.2 19.3l1.3-6L4 9.3l6.1-.7L12 3Z"/>']};
+  const [tint,icon]=map[type]||map.info;
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<div class="ti ${tint}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icon}</svg></div><div><b class="bn">${title}</b><small class="bn">${msg}</small></div>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>{t.style.transition='.3s';t.style.opacity='0';t.style.transform='translateX(30px)';setTimeout(()=>t.remove(),300);},3200);
+}
+
+/* responsive menu btn */
+if(window.innerWidth<=860)document.getElementById('menuBtn').style.display='grid';
+window.addEventListener('resize',()=>{document.getElementById('menuBtn').style.display=window.innerWidth<=860?'grid':'none';});
+</script>
+</body>
+</html>
