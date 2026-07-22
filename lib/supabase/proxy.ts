@@ -7,6 +7,7 @@ const PROTECTED_PREFIXES = [
   "/posting",
   "/orders",
   "/connections",
+  "/team",
 ];
 const AUTH_PAGES = ["/login", "/signup"];
 

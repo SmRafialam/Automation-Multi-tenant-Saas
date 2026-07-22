@@ -2,6 +2,8 @@
   "name": "autoflow-saas",
   "version": "0.1.0",
   "private": true,
+  "author": "S. M. Rafi",
+  "description": "AutoFlow — F-commerce automation suite (Facebook posting, orders + courier, connections) built by S. M. Rafi",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

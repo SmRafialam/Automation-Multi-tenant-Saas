@@ -6,12 +6,15 @@ import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { useToast } from "@/components/toast";
 import { bn } from "@/lib/format";
+import { can, ROLE_BN, type Permission } from "@/lib/roles";
+import type { Role } from "@/lib/types";
 import {
   IconBolt,
   IconGrid,
   IconMegaphone,
   IconBag,
   IconLink,
+  IconUser,
   IconWhatsapp,
   IconChart,
   IconBell,
@@ -24,22 +27,31 @@ interface ShellProps {
   business: string;
   plan: string;
   email: string;
+  role: Role;
   pendingOrders: number;
   postUsage: number;
   children: React.ReactNode;
 }
 
-const NAV = [
-  { href: "/dashboard", label: "ড্যাশবোর্ড", Icon: IconGrid },
-  { href: "/posting", label: "সোশ্যাল পোস্টিং", Icon: IconMegaphone },
-  { href: "/orders", label: "অর্ডার ও কুরিয়ার", Icon: IconBag, badge: true },
-  { href: "/connections", label: "কানেকশন", Icon: IconLink },
+const NAV: {
+  href: string;
+  label: string;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  perm: Permission;
+  badge?: boolean;
+}[] = [
+  { href: "/dashboard", label: "ড্যাশবোর্ড", Icon: IconGrid, perm: "view" },
+  { href: "/posting", label: "সোশ্যাল পোস্টিং", Icon: IconMegaphone, perm: "manage_posts" },
+  { href: "/orders", label: "অর্ডার ও কুরিয়ার", Icon: IconBag, perm: "manage_orders", badge: true },
+  { href: "/connections", label: "কানেকশন", Icon: IconLink, perm: "manage_connections" },
+  { href: "/team", label: "টিম ও রোল", Icon: IconUser, perm: "manage_team" },
 ];
 
 export function Shell({
   business,
   plan,
   email,
+  role,
   pendingOrders,
   postUsage,
   children,
@@ -69,20 +81,22 @@ export function Shell({
         </div>
 
         <div className="nav-label">Menu</div>
-        {NAV.map(({ href, label, Icon, badge }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`nav-item${pathname === href ? " active" : ""}`}
-            onClick={() => setOpen(false)}
-          >
-            <Icon />
-            <span className="bn">{label}</span>
-            {badge && pendingOrders > 0 && (
-              <span className="badge">{bn(pendingOrders)}</span>
-            )}
-          </Link>
-        ))}
+        {NAV.filter((n) => can(role, n.perm)).map(
+          ({ href, label, Icon, badge }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`nav-item${pathname === href ? " active" : ""}`}
+              onClick={() => setOpen(false)}
+            >
+              <Icon />
+              <span className="bn">{label}</span>
+              {badge && pendingOrders > 0 && (
+                <span className="badge">{bn(pendingOrders)}</span>
+              )}
+            </Link>
+          ),
+        )}
 
         <div className="nav-label">Phase 2</div>
         <button className="nav-item" onClick={soon}>
@@ -100,7 +114,7 @@ export function Shell({
               <b style={{ fontSize: 14, textTransform: "capitalize" }}>
                 {plan} Plan
               </b>
-              <span className="tag">Active</span>
+              <span className="tag bn">{ROLE_BN[role]}</span>
             </div>
             <p className="bn">{bn(postUsage)} / ৫০০ পোস্ট এই মাসে</p>
             <div className="bar">

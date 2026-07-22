@@ -12,7 +12,7 @@ export default async function DashboardLayout({
 }) {
   if (!supabaseConfigured) return <SetupNotice />;
 
-  const { supabase, user, business } = await getBusiness();
+  const { supabase, user, business, role } = await getBusiness();
   if (!user || !business) redirect("/login");
 
   const [{ count: pendingOrders }, { count: postUsage }] = await Promise.all([
@@ -33,6 +33,7 @@ export default async function DashboardLayout({
         business={business.name}
         plan={business.plan}
         email={user.email ?? ""}
+        role={role ?? "staff"}
         pendingOrders={pendingOrders ?? 0}
         postUsage={postUsage ?? 0}
       >

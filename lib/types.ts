@@ -1,3 +1,14 @@
+export type Role = "owner" | "manager" | "staff";
+
+export interface Member {
+  id: string;
+  business_id: string;
+  user_id: string;
+  email: string | null;
+  role: Role;
+  created_at: string;
+}
+
 export type PostStatus = "pending" | "processing" | "posted" | "failed";
 export type MediaType = "image" | "video" | "multi";
 export type OrderStatus =
