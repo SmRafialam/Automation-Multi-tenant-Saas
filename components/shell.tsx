@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { useToast } from "@/components/toast";
-import { bn } from "@/lib/format";
-import { can, ROLE_BN, type Permission } from "@/lib/roles";
+import { useLang } from "@/components/lang-provider";
+import { LangToggle } from "@/components/lang-toggle";
+import { can, type Permission } from "@/lib/roles";
 import type { Role } from "@/lib/types";
 import {
   IconBolt,
@@ -35,16 +36,16 @@ interface ShellProps {
 
 const NAV: {
   href: string;
-  label: string;
+  key: string;
   Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   perm: Permission;
   badge?: boolean;
 }[] = [
-  { href: "/dashboard", label: "ড্যাশবোর্ড", Icon: IconGrid, perm: "view" },
-  { href: "/posting", label: "সোশ্যাল পোস্টিং", Icon: IconMegaphone, perm: "manage_posts" },
-  { href: "/orders", label: "অর্ডার ও কুরিয়ার", Icon: IconBag, perm: "manage_orders", badge: true },
-  { href: "/connections", label: "কানেকশন", Icon: IconLink, perm: "manage_connections" },
-  { href: "/team", label: "টিম ও রোল", Icon: IconUser, perm: "manage_team" },
+  { href: "/dashboard", key: "nav.dashboard", Icon: IconGrid, perm: "view" },
+  { href: "/posting", key: "nav.posting", Icon: IconMegaphone, perm: "manage_posts" },
+  { href: "/orders", key: "nav.orders", Icon: IconBag, perm: "manage_orders", badge: true },
+  { href: "/connections", key: "nav.connections", Icon: IconLink, perm: "manage_connections" },
+  { href: "/team", key: "nav.team", Icon: IconUser, perm: "manage_team" },
 ];
 
 export function Shell({
@@ -58,6 +59,7 @@ export function Shell({
 }: ShellProps) {
   const pathname = usePathname();
   const toast = useToast();
+  const { t, num } = useLang();
   const [open, setOpen] = React.useState(false);
 
   const initials = business
@@ -67,8 +69,7 @@ export function Shell({
     .join("")
     .toUpperCase();
 
-  const soon = () =>
-    toast("info", "শীঘ্রই আসছে", "এই ফিচারটি Phase 2-এ পাওয়া যাবে");
+  const soon = () => toast("info", t("toast.soon.t"), t("toast.soon.m"));
 
   return (
     <div className="shell">
@@ -80,9 +81,9 @@ export function Shell({
           AutoFlow
         </div>
 
-        <div className="nav-label">Menu</div>
+        <div className="nav-label">{t("nav.menu")}</div>
         {NAV.filter((n) => can(role, n.perm)).map(
-          ({ href, label, Icon, badge }) => (
+          ({ href, key, Icon, badge }) => (
             <Link
               key={href}
               href={href}
@@ -90,9 +91,9 @@ export function Shell({
               onClick={() => setOpen(false)}
             >
               <Icon />
-              <span className="bn">{label}</span>
+              <span className="bn">{t(key)}</span>
               {badge && pendingOrders > 0 && (
-                <span className="badge">{bn(pendingOrders)}</span>
+                <span className="badge">{num(pendingOrders)}</span>
               )}
             </Link>
           ),
@@ -101,32 +102,32 @@ export function Shell({
         <div className="nav-label">Phase 2</div>
         <button className="nav-item" onClick={soon}>
           <IconWhatsapp />
-          <span className="bn">WhatsApp Bot</span>
+          <span className="bn">{t("nav.whatsapp")}</span>
         </button>
         <button className="nav-item" onClick={soon}>
           <IconChart />
-          <span className="bn">রিপোর্ট</span>
+          <span className="bn">{t("nav.reports")}</span>
         </button>
 
         <div className="side-foot">
           <div className="plan-card">
             <div className="row">
               <b style={{ fontSize: 14, textTransform: "capitalize" }}>
-                {plan} Plan
+                {plan} {t("plan.suffix")}
               </b>
-              <span className="tag bn">{ROLE_BN[role]}</span>
+              <span className="tag bn">{t(`role.${role}`)}</span>
             </div>
-            <p className="bn">{bn(postUsage)} / ৫০০ পোস্ট এই মাসে</p>
+            <p className="bn">{t("plan.usage", { used: num(postUsage) })}</p>
             <div className="bar">
               <i />
             </div>
             <button
               className="up bn"
               onClick={() =>
-                toast("info", "Upgrade", "Pro প্ল্যানে WhatsApp + রিপোর্ট পাবেন")
+                toast("info", t("toast.upgrade.t"), t("toast.upgrade.m"))
               }
             >
-              Pro-তে আপগ্রেড
+              {t("plan.upgrade")}
             </button>
           </div>
         </div>
@@ -144,16 +145,17 @@ export function Shell({
           </button>
           <div className="search">
             <IconSearch />
-            <input placeholder="অর্ডার, পোস্ট বা কাস্টমার খুঁজুন..." />
+            <input placeholder={t("topbar.search")} />
           </div>
           <div className="top-actions">
+            <LangToggle />
             <button
               className="icon-btn"
               onClick={() =>
                 toast(
                   "info",
-                  "নোটিফিকেশন",
-                  `${bn(pendingOrders)}টি অর্ডার অপেক্ষমাণ`,
+                  t("toast.notif.t"),
+                  t("toast.notif.m", { n: num(pendingOrders) }),
                 )
               }
             >
@@ -162,12 +164,12 @@ export function Shell({
             </button>
             <button
               className="icon-btn"
-              onClick={() => toast("info", "হেল্প", "সাপোর্ট টিম ২৪/৭ আছে")}
+              onClick={() => toast("info", t("toast.help.t"), t("toast.help.m"))}
             >
               <IconHelp />
             </button>
             <form action={logout}>
-              <button type="submit" className="user-chip" title="লগআউট">
+              <button type="submit" className="user-chip" title={t("topbar.logout")}>
                 <div className="avatar">{initials || "A"}</div>
                 <div className="who">
                   <b>{business}</b>

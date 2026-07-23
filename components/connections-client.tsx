@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast";
+import { useLang } from "@/components/lang-provider";
 import type { Connection, ConnectionType } from "@/lib/types";
 import {
   IconFacebook,
@@ -20,8 +21,8 @@ interface FieldDef {
 
 interface Provider {
   type: ConnectionType;
-  name: string;
-  desc: string;
+  nameKey: string;
+  descKey: string;
   tint: string;
   Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   fields: FieldDef[];
@@ -31,8 +32,8 @@ interface Provider {
 const PROVIDERS: Provider[] = [
   {
     type: "facebook",
-    name: "Facebook Page",
-    desc: "পোস্ট অটো-পাবলিশ ও কমেন্ট",
+    nameKey: "conn.fb.name",
+    descKey: "conn.fb.desc",
     tint: "tint-blue",
     Icon: IconFacebook,
     fields: [
@@ -42,8 +43,8 @@ const PROVIDERS: Provider[] = [
   },
   {
     type: "steadfast",
-    name: "Steadfast Courier",
-    desc: "অর্ডার পাঠানো ও ট্র্যাকিং",
+    nameKey: "conn.sf.name",
+    descKey: "conn.sf.desc",
     tint: "tint-teal",
     Icon: IconTruck,
     fields: [
@@ -53,16 +54,16 @@ const PROVIDERS: Provider[] = [
   },
   {
     type: "sheet",
-    name: "Google Sheet",
-    desc: "অর্ডার ও কাস্টমার সিংক",
+    nameKey: "conn.sheet.name",
+    descKey: "conn.sheet.desc",
     tint: "tint-green",
     Icon: IconSheet,
     fields: [{ key: "sheet_id", label: "Sheet ID", placeholder: "1aBcD..." }],
   },
   {
     type: "whatsapp",
-    name: "WhatsApp Cloud",
-    desc: "অর্ডার কনফার্মেশন মেসেজ (Phase 2)",
+    nameKey: "conn.wa.name",
+    descKey: "conn.wa.desc",
     tint: "tint-green",
     Icon: IconWhatsapp,
     fields: [],
@@ -77,6 +78,7 @@ export function ConnectionsClient({
 }) {
   const router = useRouter();
   const toast = useToast();
+  const { t } = useLang();
   const byType = new Map(connections.map((c) => [c.type, c]));
   const [drafts, setDrafts] = React.useState<
     Record<string, Record<string, string>>
@@ -90,7 +92,7 @@ export function ConnectionsClient({
     const values = drafts[p.type] || {};
     for (const f of p.fields) {
       if (!values[f.key]?.trim()) {
-        toast("error", "তথ্য দিন", `${f.label} লাগবে`);
+        toast("error", t("t.c_fill.t"), f.label);
         return;
       }
     }
@@ -110,22 +112,22 @@ export function ConnectionsClient({
       });
       const data = await res.json();
       if (res.ok) {
-        toast("success", p.name, "সফলভাবে সংযুক্ত হয়েছে");
+        toast("success", t(p.nameKey), t("t.c_ok.m"));
         setDrafts((d) => ({ ...d, [p.type]: {} }));
         router.refresh();
       } else {
-        toast("error", "সমস্যা", data.error || "সংযোগ হয়নি");
+        toast("error", t("err.title"), data.error || t("err.not_saved"));
       }
     } finally {
       setBusy(null);
     }
   }
 
-  async function disconnect(type: ConnectionType, name: string) {
+  async function disconnect(type: ConnectionType, nameKey: string) {
     setBusy(type);
     try {
       await fetch(`/api/connections/${type}`, { method: "DELETE" });
-      toast("info", name, "সংযোগ বিচ্ছিন্ন হয়েছে");
+      toast("info", t(nameKey), t("t.c_off.m"));
       router.refresh();
     } finally {
       setBusy(null);
@@ -136,10 +138,8 @@ export function ConnectionsClient({
     <>
       <div className="page-head">
         <div>
-          <h1 className="bn">কানেকশন</h1>
-          <p className="bn">
-            আপনার অ্যাকাউন্টগুলো যুক্ত করুন — সব automation এখান থেকে চলবে
-          </p>
+          <h1 className="bn">{t("conn.title")}</h1>
+          <p className="bn">{t("conn.subtitle")}</p>
         </div>
       </div>
 
@@ -154,11 +154,15 @@ export function ConnectionsClient({
                   <p.Icon />
                 </div>
                 <div>
-                  <h3>{p.name}</h3>
-                  <div className="desc bn">{p.desc}</div>
+                  <h3>{t(p.nameKey)}</h3>
+                  <div className="desc bn">{t(p.descKey)}</div>
                 </div>
                 <div className={`conn-status ${on ? "on" : "off"} bn`}>
-                  {on ? "সংযুক্ত" : p.soon ? "শীঘ্রই" : "সংযুক্ত নয়"}
+                  {on
+                    ? t("conn.connected")
+                    : p.soon
+                      ? t("conn.soon")
+                      : t("conn.not_connected")}
                 </div>
               </div>
 
@@ -173,7 +177,7 @@ export function ConnectionsClient({
                         </div>
                         <div className="kv">
                           <span>Token</span>
-                          <b>•••• সংরক্ষিত</b>
+                          <b>{t("conn.saved")}</b>
                         </div>
                       </>
                     ) : (
@@ -182,7 +186,7 @@ export function ConnectionsClient({
                       ).map(([k, v]) => (
                         <div className="kv" key={k}>
                           <span>{k}</span>
-                          <b>{v.length > 10 ? "•••• সংরক্ষিত" : v}</b>
+                          <b>{v.length > 10 ? t("conn.saved") : v}</b>
                         </div>
                       ))
                     )}
@@ -190,10 +194,10 @@ export function ConnectionsClient({
                   <div className="conn-actions">
                     <button
                       className="btn ghost sm bn"
-                      onClick={() => disconnect(p.type, p.name)}
+                      onClick={() => disconnect(p.type, p.nameKey)}
                       disabled={busy === p.type}
                     >
-                      ডিসকানেক্ট
+                      {t("conn.disconnect")}
                     </button>
                   </div>
                 </>
@@ -201,18 +205,16 @@ export function ConnectionsClient({
                 <>
                   <div className="conn-body bn">
                     <div className="kv">
-                      <span>স্ট্যাটাস</span>
-                      <b>শীঘ্রই আসছে (Phase 2)</b>
+                      <span>{t("conn.status")}</span>
+                      <b>{t("conn.soon_full")}</b>
                     </div>
                   </div>
                   <div className="conn-actions">
                     <button
                       className="btn ghost sm bn"
-                      onClick={() =>
-                        toast("info", p.name, "Phase 2-এ পাওয়া যাবে")
-                      }
+                      onClick={() => toast("info", t(p.nameKey), t("t.c_soon.m"))}
                     >
-                      বিস্তারিত
+                      {t("conn.details")}
                     </button>
                   </div>
                 </>
@@ -224,9 +226,7 @@ export function ConnectionsClient({
                         <label className="bn">{f.label}</label>
                         <input
                           value={drafts[p.type]?.[f.key] || ""}
-                          onChange={(e) =>
-                            setField(p.type, f.key, e.target.value)
-                          }
+                          onChange={(e) => setField(p.type, f.key, e.target.value)}
                           placeholder={f.placeholder}
                         />
                       </div>
@@ -239,7 +239,7 @@ export function ConnectionsClient({
                       disabled={busy === p.type}
                     >
                       <IconLink />
-                      {busy === p.type ? "যুক্ত হচ্ছে..." : "যুক্ত করুন"}
+                      {busy === p.type ? t("conn.connecting") : t("conn.connect")}
                     </button>
                   </div>
                 </>

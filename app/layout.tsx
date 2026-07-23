@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
+import { getLang } from "@/lib/lang";
+import { LangProvider } from "@/components/lang-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,15 +19,18 @@ const hind = Hind_Siliguri({
 export const metadata: Metadata = {
   title: "AutoFlow — F-commerce Automation Suite",
   description:
-    "এক জায়গা থেকে Facebook পোস্টিং, অর্ডার, কুরিয়ার আর কাস্টমার — F-commerce automation dashboard.",
+    "Facebook posting, orders, courier and customers — all your F-commerce automation in one dashboard.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const lang = await getLang();
   return (
-    <html lang="bn" className={`${inter.variable} ${hind.variable} h-full`}>
-      <body>{children}</body>
+    <html lang={lang} className={`${inter.variable} ${hind.variable} h-full`}>
+      <body>
+        <LangProvider initial={lang}>{children}</LangProvider>
+      </body>
     </html>
   );
 }

@@ -3,7 +3,9 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast";
-import { bn, money, STATUS_BN, COURIER_NAME } from "@/lib/format";
+import { useLang } from "@/components/lang-provider";
+import { translate } from "@/lib/i18n";
+import { COURIER_NAME } from "@/lib/format";
 import type { Courier, Order } from "@/lib/types";
 import {
   IconPlus,
@@ -28,6 +30,7 @@ const empty = {
 export function OrdersClient({ orders }: { orders: Order[] }) {
   const router = useRouter();
   const toast = useToast();
+  const { t, num, money, lang } = useLang();
   const [open, setOpen] = React.useState(false);
   const [form, setForm] = React.useState({ ...empty });
   const [busy, setBusy] = React.useState(false);
@@ -35,13 +38,12 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
 
   const stat = (s: string) => orders.filter((o) => o.status === s).length;
   const totalAmount = orders.reduce((a, o) => a + Number(o.amount), 0);
-
   const set = (k: keyof typeof empty, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
   async function addOrder() {
     if (!form.customer_name.trim() || !Number(form.amount)) {
-      toast("error", "তথ্য অসম্পূর্ণ", "নাম আর এমাউন্ট দিন");
+      toast("error", t("t.o_incomplete.t"), t("t.o_incomplete.m"));
       return;
     }
     setBusy(true);
@@ -55,10 +57,10 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
       if (res.ok) {
         setForm({ ...empty });
         setOpen(false);
-        toast("success", "অর্ডার যুক্ত হয়েছে", "এখন কুরিয়ারে পাঠাতে পারেন");
+        toast("success", t("t.o_added.t"), t("t.o_added.m"));
         router.refresh();
       } else {
-        toast("error", "সমস্যা", data.error || "সেভ হয়নি");
+        toast("error", t("err.title"), data.error || t("err.not_saved"));
       }
     } finally {
       setBusy(false);
@@ -67,17 +69,17 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
 
   async function sendCourier(id: string) {
     setRowBusy(id);
-    toast("info", "Steadfast-এ পাঠানো হচ্ছে...", "অর্ডার তথ্য সাবমিট হচ্ছে");
+    toast("info", t("t.o_sending.t"), t("t.o_sending.m"));
     try {
       const res = await fetch(`/api/orders/${id}/courier`, { method: "POST" });
       const data = await res.json();
       if (res.ok)
         toast(
           "success",
-          "কুরিয়ারে পাঠানো হয়েছে",
-          `ট্র্যাকিং: ${data.order?.courier_tracking_id ?? "OK"}`,
+          t("t.o_shipped.t"),
+          `${t("th.tracking")}: ${data.order?.courier_tracking_id ?? "OK"}`,
         );
-      else toast("error", "পাঠানো যায়নি", data.error || "Steadfast error");
+      else toast("error", t("t.o_ship_fail.t"), data.error || t("err.title"));
       router.refresh();
     } finally {
       setRowBusy(null);
@@ -85,24 +87,22 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
   }
 
   const stats = [
-    { tint: "tint-amber", Icon: IconClock, lbl: "পেন্ডিং", val: bn(stat("pending")) },
-    { tint: "tint-violet", Icon: IconTruck, lbl: "শিপড", val: bn(stat("shipped")) },
-    { tint: "tint-green", Icon: IconCheck, lbl: "ডেলিভার্ড", val: bn(stat("delivered")) },
-    { tint: "tint-teal", Icon: IconTaka, lbl: "মোট এমাউন্ট", val: money(totalAmount) },
+    { tint: "tint-amber", Icon: IconClock, lbl: t("stat.pending"), val: num(stat("pending")) },
+    { tint: "tint-violet", Icon: IconTruck, lbl: t("stat.shipped"), val: num(stat("shipped")) },
+    { tint: "tint-green", Icon: IconCheck, lbl: t("stat.delivered"), val: num(stat("delivered")) },
+    { tint: "tint-teal", Icon: IconTaka, lbl: t("stat.total_amount"), val: money(totalAmount) },
   ];
 
   return (
     <>
       <div className="page-head">
         <div>
-          <h1 className="bn">অর্ডার ও কুরিয়ার</h1>
-          <p className="bn">
-            অর্ডার ম্যানেজ করুন আর এক ক্লিকে Steadfast-এ পাঠান
-          </p>
+          <h1 className="bn">{t("orders.title")}</h1>
+          <p className="bn">{t("orders.subtitle")}</p>
         </div>
         <button className="btn primary bn" onClick={() => setOpen(true)}>
           <IconPlus />
-          নতুন অর্ডার
+          {t("act.new_order")}
         </button>
       </div>
 
@@ -121,18 +121,21 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
       <div className="card">
         <div className="card-head">
           <h3 className="bn">
-            সব অর্ডার <span className="pill-count">{bn(orders.length)} টি</span>
+            {t("orders.all")}{" "}
+            <span className="pill-count">
+              {t("count.items", { n: num(orders.length) })}
+            </span>
           </h3>
         </div>
         <div className="tbl-wrap">
           <table>
             <thead>
               <tr>
-                <th>কাস্টমার / আইটেম</th>
-                <th>ফোন</th>
-                <th>এমাউন্ট</th>
-                <th>ট্র্যাকিং</th>
-                <th>স্ট্যাটাস</th>
+                <th>{t("th.customer_item")}</th>
+                <th>{t("th.phone")}</th>
+                <th>{t("th.amount")}</th>
+                <th>{t("th.tracking")}</th>
+                <th>{t("th.status")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -148,9 +151,7 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
                   <td>
                     {o.courier_tracking_id ? (
                       <>
-                        <span className="cell-sub">
-                          {COURIER_NAME[o.courier]}
-                        </span>
+                        <span className="cell-sub">{COURIER_NAME[o.courier]}</span>
                         <br />
                         {o.courier_tracking_id}
                       </>
@@ -160,7 +161,7 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
                   </td>
                   <td>
                     <span className={`badge-s s-${o.status}`}>
-                      {STATUS_BN[o.status]}
+                      {translate(lang, `status.${o.status}`)}
                     </span>
                   </td>
                   <td className="row-act">
@@ -176,12 +177,12 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
                     ) : (
                       <button
                         className="mini"
-                        title="ট্র্যাক"
+                        title={t("t.track.t")}
                         onClick={() =>
                           toast(
                             "info",
-                            "ট্র্যাকিং",
-                            `${o.courier_tracking_id || "—"} — ${STATUS_BN[o.status]}`,
+                            t("t.track.t"),
+                            `${o.courier_tracking_id || "—"} — ${translate(lang, `status.${o.status}`)}`,
                           )
                         }
                       >
@@ -194,7 +195,7 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
               {orders.length === 0 && (
                 <tr>
                   <td colSpan={6} className="empty bn">
-                    এখনো কোনো অর্ডার নেই — উপরে ডান দিক থেকে যোগ করুন
+                    {t("orders.empty")}
                   </td>
                 </tr>
               )}
@@ -207,7 +208,7 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
         <div className="modal-bg" onClick={() => setOpen(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
-              <h3 className="bn">নতুন অর্ডার</h3>
+              <h3 className="bn">{t("act.new_order")}</h3>
               <button onClick={() => setOpen(false)}>
                 <IconClose />
               </button>
@@ -216,41 +217,41 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
               <div className="form-grid">
                 <div className="row2">
                   <div>
-                    <label className="bn">কাস্টমারের নাম</label>
+                    <label className="bn">{t("orders.m.name")}</label>
                     <input
                       value={form.customer_name}
                       onChange={(e) => set("customer_name", e.target.value)}
-                      placeholder="যেমন: তানিয়া আক্তার"
+                      placeholder={t("orders.m.name_ph")}
                     />
                   </div>
                   <div>
-                    <label className="bn">ফোন</label>
+                    <label className="bn">{t("th.phone")}</label>
                     <input
                       value={form.customer_phone}
                       onChange={(e) => set("customer_phone", e.target.value)}
-                      placeholder="017XXXXXXXX"
+                      placeholder={t("orders.m.phone_ph")}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="bn">ঠিকানা</label>
+                  <label className="bn">{t("orders.m.address")}</label>
                   <input
                     value={form.address}
                     onChange={(e) => set("address", e.target.value)}
-                    placeholder="বাসা, রোড, এলাকা, জেলা"
+                    placeholder={t("orders.m.address_ph")}
                   />
                 </div>
                 <div className="row2">
                   <div>
-                    <label className="bn">আইটেম</label>
+                    <label className="bn">{t("orders.m.items")}</label>
                     <input
                       value={form.items}
                       onChange={(e) => set("items", e.target.value)}
-                      placeholder="থ্রি-পিস (M) x1"
+                      placeholder={t("orders.m.items_ph")}
                     />
                   </div>
                   <div>
-                    <label className="bn">এমাউন্ট (৳)</label>
+                    <label className="bn">{t("orders.m.amount")}</label>
                     <input
                       type="number"
                       value={form.amount}
@@ -260,7 +261,7 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
                   </div>
                 </div>
                 <div>
-                  <label className="bn">কুরিয়ার</label>
+                  <label className="bn">{t("orders.m.courier")}</label>
                   <select
                     value={form.courier}
                     onChange={(e) => set("courier", e.target.value)}
@@ -274,14 +275,10 @@ export function OrdersClient({ orders }: { orders: Order[] }) {
             </div>
             <div className="modal-foot">
               <button className="btn ghost bn" onClick={() => setOpen(false)}>
-                বাতিল
+                {t("act.cancel")}
               </button>
-              <button
-                className="btn primary bn"
-                onClick={addOrder}
-                disabled={busy}
-              >
-                {busy ? "সেভ হচ্ছে..." : "অর্ডার সেভ করুন"}
+              <button className="btn primary bn" onClick={addOrder} disabled={busy}>
+                {busy ? t("posting.saving") : t("orders.m.save")}
               </button>
             </div>
           </div>

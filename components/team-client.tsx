@@ -3,16 +3,10 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast";
-import { ROLE_BN } from "@/lib/roles";
-import { bnDate } from "@/lib/format";
+import { useLang } from "@/components/lang-provider";
+import { dateFmt, translate } from "@/lib/i18n";
 import type { Member, Role } from "@/lib/types";
 import { IconPlus, IconTrash, IconUser } from "@/components/icons";
-
-const ROLE_DESC: Record<Role, string> = {
-  owner: "সব কিছুর পূর্ণ নিয়ন্ত্রণ — টিম, কানেকশন, বিলিং",
-  manager: "পোস্ট, অর্ডার ও কানেকশন চালাতে পারে (টিম নয়)",
-  staff: "শুধু পোস্ট ও অর্ডারের দৈনন্দিন কাজ",
-};
 
 export function TeamClient({
   members,
@@ -23,6 +17,7 @@ export function TeamClient({
 }) {
   const router = useRouter();
   const toast = useToast();
+  const { t, lang } = useLang();
   const [email, setEmail] = React.useState("");
   const [role, setRole] = React.useState<Role>("staff");
   const [busy, setBusy] = React.useState(false);
@@ -30,7 +25,7 @@ export function TeamClient({
 
   async function addMember() {
     if (!email.trim()) {
-      toast("error", "ইমেইল দিন", "যাকে যোগ করবেন তার ইমেইল লিখুন");
+      toast("error", t("t.t_email.t"), t("t.t_email.m"));
       return;
     }
     setBusy(true);
@@ -43,10 +38,10 @@ export function TeamClient({
       const data = await res.json();
       if (res.ok) {
         setEmail("");
-        toast("success", "মেম্বার যোগ হয়েছে", `${email} — ${ROLE_BN[role]}`);
+        toast("success", t("t.t_added.t"), `${email} — ${translate(lang, `role.${role}`)}`);
         router.refresh();
       } else {
-        toast("error", "যোগ করা যায়নি", data.error || "সমস্যা হয়েছে");
+        toast("error", t("t.t_addfail.t"), data.error || t("err.title"));
       }
     } finally {
       setBusy(false);
@@ -62,11 +57,11 @@ export function TeamClient({
         body: JSON.stringify({ role: newRole }),
       });
       if (res.ok) {
-        toast("success", "রোল আপডেট", ROLE_BN[newRole]);
+        toast("success", t("t.t_role.t"), translate(lang, `role.${newRole}`));
         router.refresh();
       } else {
         const d = await res.json();
-        toast("error", "সমস্যা", d.error || "আপডেট হয়নি");
+        toast("error", t("err.title"), d.error || t("err.not_saved"));
       }
     } finally {
       setRowBusy(null);
@@ -78,11 +73,11 @@ export function TeamClient({
     try {
       const res = await fetch(`/api/team/${userId}`, { method: "DELETE" });
       if (res.ok) {
-        toast("info", "সরানো হয়েছে", "মেম্বারকে বিজনেস থেকে সরানো হয়েছে");
+        toast("info", t("t.t_removed.t"), t("t.t_removed.m"));
         router.refresh();
       } else {
         const d = await res.json();
-        toast("error", "সমস্যা", d.error || "সরানো যায়নি");
+        toast("error", t("err.title"), d.error || t("err.not_saved"));
       }
     } finally {
       setRowBusy(null);
@@ -93,21 +88,19 @@ export function TeamClient({
     <>
       <div className="page-head">
         <div>
-          <h1 className="bn">টিম ও রোল</h1>
-          <p className="bn">
-            টিম মেম্বার যোগ করুন এবং কে কী করতে পারবে তা নিয়ন্ত্রণ করুন
-          </p>
+          <h1 className="bn">{t("team.title")}</h1>
+          <p className="bn">{t("team.subtitle")}</p>
         </div>
       </div>
 
       <div className="two-col">
         <div className="card">
           <div className="card-head">
-            <h3 className="bn">নতুন মেম্বার যোগ করুন</h3>
+            <h3 className="bn">{t("team.add")}</h3>
           </div>
           <div className="form-grid">
             <div>
-              <label className="bn">ইমেইল (সে আগে সাইন আপ করা থাকতে হবে)</label>
+              <label className="bn">{t("team.email_label")}</label>
               <input
                 type="email"
                 value={email}
@@ -116,10 +109,10 @@ export function TeamClient({
               />
             </div>
             <div>
-              <label className="bn">রোল</label>
+              <label className="bn">{t("team.role_label")}</label>
               <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-                <option value="manager">ম্যানেজার</option>
-                <option value="staff">স্টাফ</option>
+                <option value="manager">{translate(lang, "role.manager")}</option>
+                <option value="staff">{translate(lang, "role.staff")}</option>
               </select>
             </div>
             <button
@@ -129,17 +122,17 @@ export function TeamClient({
               disabled={busy}
             >
               <IconPlus />
-              {busy ? "যোগ হচ্ছে..." : "মেম্বার যোগ করুন"}
+              {busy ? t("team.adding") : t("team.add_btn")}
             </button>
 
             <div className="conn-body bn" style={{ marginTop: 4 }}>
               {(["owner", "manager", "staff"] as Role[]).map((r) => (
                 <div className="kv" key={r} style={{ alignItems: "flex-start" }}>
                   <span style={{ minWidth: 74, color: "var(--teal)", fontWeight: 600 }}>
-                    {ROLE_BN[r]}
+                    {translate(lang, `role.${r}`)}
                   </span>
                   <b style={{ fontWeight: 400, color: "var(--text-dim)", textAlign: "right" }}>
-                    {ROLE_DESC[r]}
+                    {t(`team.desc.${r}`)}
                   </b>
                 </div>
               ))}
@@ -149,15 +142,15 @@ export function TeamClient({
 
         <div className="card">
           <div className="card-head">
-            <h3 className="bn">টিম মেম্বার</h3>
+            <h3 className="bn">{t("team.members")}</h3>
           </div>
           <div className="tbl-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>মেম্বার</th>
-                  <th>রোল</th>
-                  <th>যোগদান</th>
+                  <th>{t("th.member")}</th>
+                  <th>{t("th.role")}</th>
+                  <th>{t("th.joined")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -176,7 +169,7 @@ export function TeamClient({
                             <div className="cell-main">
                               {m.email || "—"}
                               {isSelf && (
-                                <span className="cell-sub"> (আপনি)</span>
+                                <span className="cell-sub">{t("team.you")}</span>
                               )}
                             </div>
                           </div>
@@ -185,7 +178,7 @@ export function TeamClient({
                       <td>
                         {isOwner ? (
                           <span className="badge-s s-posted">
-                            {ROLE_BN.owner}
+                            {translate(lang, "role.owner")}
                           </span>
                         ) : (
                           <select
@@ -203,17 +196,22 @@ export function TeamClient({
                               fontSize: 13,
                             }}
                           >
-                            <option value="manager">ম্যানেজার</option>
-                            <option value="staff">স্টাফ</option>
+                            <option value="manager">{translate(lang, "role.manager")}</option>
+                            <option value="staff">{translate(lang, "role.staff")}</option>
                           </select>
                         )}
                       </td>
-                      <td className="cell-sub">{bnDate(m.created_at)}</td>
+                      <td className="cell-sub">
+                        {dateFmt(m.created_at, lang, {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
                       <td className="row-act">
                         {!isOwner && (
                           <button
                             className="mini"
-                            title="সরান"
                             onClick={() => removeMember(m.user_id)}
                             disabled={rowBusy === m.user_id}
                           >

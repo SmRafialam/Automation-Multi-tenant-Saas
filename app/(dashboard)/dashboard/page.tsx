@@ -1,20 +1,21 @@
 import Link from "next/link";
 import { getBusiness } from "@/lib/data";
+import { getT } from "@/lib/lang";
+import { num, money, dateFmt, translate } from "@/lib/i18n";
+import { COURIER_NAME } from "@/lib/format";
 import { Sparkline, AreaChart } from "@/components/charts";
 import {
   IconTaka,
   IconBag,
   IconMegaphone,
-  IconUser,
   IconTrendUp,
   IconPlus,
   IconCheck,
-  IconSparkle,
 } from "@/components/icons";
-import { bn, money, bnDateTime, STATUS_BN, COURIER_NAME } from "@/lib/format";
 import type { Order, Post } from "@/lib/types";
 
 const WEEKDAYS_BN = ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহ", "শুক্র", "শনি"];
+const WEEKDAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function sameDay(a: Date, b: Date) {
   return a.toDateString() === b.toDateString();
@@ -23,6 +24,7 @@ function sameDay(a: Date, b: Date) {
 export default async function DashboardPage() {
   const { supabase, business } = await getBusiness();
   if (!business) return null;
+  const { lang, t } = await getT();
 
   const [{ data: orders }, { data: posts }] = await Promise.all([
     supabase
@@ -49,7 +51,6 @@ export default async function DashboardPage() {
   const todaySales = todaysOrders.reduce((s, o) => s + Number(o.amount), 0);
   const pendingPosts = postList.filter((p) => p.status === "pending").length;
 
-  // last 7 day series
   const days: Date[] = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - (6 - i));
@@ -65,42 +66,43 @@ export default async function DashboardPage() {
   const orderSeries = days.map(
     (d) => orderList.filter((o) => sameDay(new Date(o.created_at), d)).length,
   );
-  const labels = days.map((d) => WEEKDAYS_BN[d.getDay()]);
+  const weekdays = lang === "bn" ? WEEKDAYS_BN : WEEKDAYS_EN;
+  const labels = days.map((d) => weekdays[d.getDay()]);
 
   const kpis = [
     {
       tint: "tint-teal",
       Icon: IconTaka,
-      lbl: "আজকের বিক্রি",
-      val: money(todaySales),
-      trend: `+${bn(todaysOrders.length)} অর্ডার`,
+      lbl: t("kpi.today_sales"),
+      val: money(todaySales, lang),
+      trend: t("kpi.trend_orders", { n: num(todaysOrders.length, lang) }),
       spark: salesSeries,
       color: "#2dd4bf",
     },
     {
       tint: "tint-blue",
       Icon: IconBag,
-      lbl: "আজকের অর্ডার",
-      val: bn(todaysOrders.length),
-      trend: "আজ পর্যন্ত",
+      lbl: t("kpi.today_orders"),
+      val: num(todaysOrders.length, lang),
+      trend: t("kpi.upto_today"),
       spark: orderSeries,
       color: "#60a5fa",
     },
     {
       tint: "tint-violet",
       Icon: IconMegaphone,
-      lbl: "পেন্ডিং পোস্ট",
-      val: bn(pendingPosts),
-      trend: "শিডিউলে আছে",
+      lbl: t("kpi.pending_posts"),
+      val: num(pendingPosts, lang),
+      trend: t("kpi.in_schedule"),
       spark: orderSeries.map((v) => v + 1),
       color: "#a78bfa",
     },
     {
       tint: "tint-amber",
       Icon: IconBag,
-      lbl: "মোট অর্ডার",
-      val: bn(orderList.length),
-      trend: "সর্বমোট",
+      lbl: t("kpi.total_orders"),
+      val: num(orderList.length, lang),
+      trend: t("kpi.total"),
       spark: salesSeries.map((v) => v + 2),
       color: "#f59e0b",
     },
@@ -112,24 +114,25 @@ export default async function DashboardPage() {
     <>
       <div className="page-head">
         <div>
-          <h1 className="bn">স্বাগতম, {business.name} 👋</h1>
+          <h1 className="bn">{t("dash.welcome", { name: business.name })}</h1>
           <p className="bn">
-            আজ আপনার ব্যবসার এক নজরে অবস্থা —{" "}
-            {today.toLocaleDateString("bn-BD", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
+            {t("dash.subtitle", {
+              date: dateFmt(today, lang, {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              }),
             })}
           </p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <Link href="/posting" className="btn ghost bn">
             <IconMegaphone />
-            নতুন পোস্ট
+            {t("act.new_post")}
           </Link>
           <Link href="/orders" className="btn primary bn">
             <IconPlus />
-            নতুন অর্ডার
+            {t("act.new_order")}
           </Link>
         </div>
       </div>
@@ -157,33 +160,29 @@ export default async function DashboardPage() {
         <div className="card">
           <div className="card-head">
             <div>
-              <h3 className="bn">বিক্রি ও অর্ডার</h3>
+              <h3 className="bn">{t("chart.title")}</h3>
               <div className="chart-legend" style={{ marginTop: 8 }}>
                 <span className="l">
-                  <i style={{ background: "#2dd4bf" }} /> বিক্রি (হাজার ৳)
+                  <i style={{ background: "#2dd4bf" }} /> {t("chart.sales")}
                 </span>
                 <span className="l">
-                  <i style={{ background: "#3b82f6" }} /> অর্ডার
+                  <i style={{ background: "#3b82f6" }} /> {t("chart.orders")}
                 </span>
               </div>
             </div>
           </div>
           <div className="chart-wrap">
-            <AreaChart
-              sales={salesSeries}
-              orders={orderSeries}
-              labels={labels}
-            />
+            <AreaChart sales={salesSeries} orders={orderSeries} labels={labels} />
           </div>
         </div>
 
         <div className="card">
           <div className="card-head">
-            <h3 className="bn">সাম্প্রতিক কার্যকলাপ</h3>
+            <h3 className="bn">{t("dash.activity")}</h3>
           </div>
           <div className="feed">
             {feed.length === 0 && (
-              <div className="empty bn">এখনো কোনো কার্যকলাপ নেই</div>
+              <div className="empty bn">{t("dash.no_activity")}</div>
             )}
             {feed.map((o) => (
               <div className="feed-item" key={o.id}>
@@ -200,10 +199,17 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <div className="ft bn">
-                    <b>{o.customer_name}</b> — {money(Number(o.amount))} (
-                    {STATUS_BN[o.status]})
+                    <b>{o.customer_name}</b> — {money(Number(o.amount), lang)} (
+                    {translate(lang, `status.${o.status}`)})
                   </div>
-                  <div className="fd">{bnDateTime(o.created_at)}</div>
+                  <div className="fd">
+                    {dateFmt(o.created_at, lang, {
+                      day: "numeric",
+                      month: "short",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </div>
                 </div>
               </div>
             ))}
@@ -213,19 +219,19 @@ export default async function DashboardPage() {
 
       <div className="card" style={{ marginTop: 18 }}>
         <div className="card-head">
-          <h3 className="bn">সাম্প্রতিক অর্ডার</h3>
+          <h3 className="bn">{t("dash.recent_orders")}</h3>
           <Link href="/orders" className="link bn">
-            সব অর্ডার →
+            {t("dash.all_orders")}
           </Link>
         </div>
         <div className="tbl-wrap">
           <table>
             <thead>
               <tr>
-                <th>কাস্টমার</th>
-                <th>এমাউন্ট</th>
-                <th>কুরিয়ার</th>
-                <th>স্ট্যাটাস</th>
+                <th>{t("th.customer")}</th>
+                <th>{t("th.amount")}</th>
+                <th>{t("th.courier")}</th>
+                <th>{t("th.status")}</th>
               </tr>
             </thead>
             <tbody>
@@ -235,11 +241,11 @@ export default async function DashboardPage() {
                     <div className="cell-main">{o.customer_name}</div>
                     <div className="cell-sub">{o.customer_phone}</div>
                   </td>
-                  <td className="cell-main">{money(Number(o.amount))}</td>
+                  <td className="cell-main">{money(Number(o.amount), lang)}</td>
                   <td>{COURIER_NAME[o.courier]}</td>
                   <td>
                     <span className={`badge-s s-${o.status}`}>
-                      {STATUS_BN[o.status]}
+                      {translate(lang, `status.${o.status}`)}
                     </span>
                   </td>
                 </tr>
@@ -247,7 +253,7 @@ export default async function DashboardPage() {
               {orderList.length === 0 && (
                 <tr>
                   <td colSpan={4} className="empty bn">
-                    এখনো কোনো অর্ডার নেই — <Link href="/orders">যোগ করুন</Link>
+                    {t("dash.no_orders")} — <Link href="/orders">{t("dash.add")}</Link>
                   </td>
                 </tr>
               )}

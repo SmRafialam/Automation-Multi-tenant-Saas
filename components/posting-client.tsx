@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast";
-import { bn, bnDateTime, STATUS_BN, MEDIA_TYPE_BN } from "@/lib/format";
+import { useLang } from "@/components/lang-provider";
+import { dateFmt, translate } from "@/lib/i18n";
 import type { MediaType, Post } from "@/lib/types";
 import {
   IconImage,
@@ -17,22 +18,21 @@ import {
   MEDIA_ICON,
 } from "@/components/icons";
 
-const TYPES: { t: MediaType; label: string; Icon: React.ComponentType }[] = [
-  { t: "image", label: "ছবি", Icon: IconImage },
-  { t: "video", label: "ভিডিও", Icon: IconVideo },
-  { t: "multi", label: "মাল্টি", Icon: IconLayers },
+const TYPES: { t: MediaType; Icon: React.ComponentType }[] = [
+  { t: "image", Icon: IconImage },
+  { t: "video", Icon: IconVideo },
+  { t: "multi", Icon: IconLayers },
 ];
 
 export function PostingClient({ posts }: { posts: Post[] }) {
   const router = useRouter();
   const toast = useToast();
+  const { t, num, lang } = useLang();
 
   const [type, setType] = React.useState<MediaType>("image");
   const [mediaUrl, setMediaUrl] = React.useState("");
   const [caption, setCaption] = React.useState("");
-  const [date, setDate] = React.useState(
-    new Date().toISOString().slice(0, 10),
-  );
+  const [date, setDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [time, setTime] = React.useState("19:00");
   const [busy, setBusy] = React.useState(false);
   const [aiBusy, setAiBusy] = React.useState(false);
@@ -49,9 +49,9 @@ export function PostingClient({ posts }: { posts: Post[] }) {
       const data = await res.json();
       if (data.caption) {
         setCaption(data.caption);
-        toast("ai", "AI ক্যাপশন তৈরি", "পছন্দমতো এডিট করে নিন");
+        toast("ai", t("t.ai.t"), t("t.ai.m"));
       } else {
-        toast("error", "সমস্যা", data.error || "ক্যাপশন তৈরি হয়নি");
+        toast("error", t("err.title"), data.error || t("err.not_saved"));
       }
     } finally {
       setAiBusy(false);
@@ -60,7 +60,7 @@ export function PostingClient({ posts }: { posts: Post[] }) {
 
   async function addPost() {
     if (!caption.trim()) {
-      toast("error", "ক্যাপশন দিন", "পোস্টের জন্য ক্যাপশন লিখুন");
+      toast("error", t("t.cap_req.t"), t("t.cap_req.m"));
       return;
     }
     setBusy(true);
@@ -81,10 +81,10 @@ export function PostingClient({ posts }: { posts: Post[] }) {
       if (res.ok) {
         setCaption("");
         setMediaUrl("");
-        toast("success", "পোস্ট শিডিউল হয়েছে", "cron চললে Facebook-এ যাবে");
+        toast("success", t("t.post_ok.t"), t("t.post_ok.m"));
         router.refresh();
       } else {
-        toast("error", "সমস্যা", data.error || "সেভ হয়নি");
+        toast("error", t("err.title"), data.error || t("err.not_saved"));
       }
     } finally {
       setBusy(false);
@@ -93,12 +93,12 @@ export function PostingClient({ posts }: { posts: Post[] }) {
 
   async function publishNow(id: string) {
     setRowBusy(id);
-    toast("info", "পাবলিশ হচ্ছে...", "Facebook Graph API-তে পাঠানো হচ্ছে");
+    toast("info", t("t.publishing.t"), t("t.publishing.m"));
     try {
       const res = await fetch(`/api/posts/${id}/publish`, { method: "POST" });
       const data = await res.json();
-      if (res.ok) toast("success", "পোস্ট লাইভ!", "Facebook-এ পোস্ট হয়েছে");
-      else toast("error", "পোস্ট ব্যর্থ", data.error || "Graph API error");
+      if (res.ok) toast("success", t("t.live.t"), t("t.live.m"));
+      else toast("error", t("t.pfail.t"), data.error || t("err.title"));
       router.refresh();
     } finally {
       setRowBusy(null);
@@ -109,7 +109,7 @@ export function PostingClient({ posts }: { posts: Post[] }) {
     setRowBusy(id);
     try {
       await fetch(`/api/posts/${id}`, { method: "DELETE" });
-      toast("info", "ডিলিট হয়েছে", "পোস্টটি সরানো হয়েছে");
+      toast("info", t("t.del.t"), t("t.del.m"));
       router.refresh();
     } finally {
       setRowBusy(null);
@@ -120,55 +120,53 @@ export function PostingClient({ posts }: { posts: Post[] }) {
     <>
       <div className="page-head">
         <div>
-          <h1 className="bn">সোশ্যাল পোস্টিং</h1>
-          <p className="bn">
-            পোস্ট তৈরি করুন, শিডিউল করুন — Facebook-এ অটো পাবলিশ হবে
-          </p>
+          <h1 className="bn">{t("posting.title")}</h1>
+          <p className="bn">{t("posting.subtitle")}</p>
         </div>
       </div>
 
       <div className="two-col">
         <div className="card">
           <div className="card-head">
-            <h3 className="bn">নতুন পোস্ট তৈরি</h3>
+            <h3 className="bn">{t("posting.new")}</h3>
           </div>
           <div className="form-grid">
             <div>
-              <label className="bn">মিডিয়া টাইপ</label>
+              <label className="bn">{t("posting.media_type")}</label>
               <div className="seg-type">
-                {TYPES.map(({ t, label, Icon }) => (
+                {TYPES.map(({ t: ty, Icon }) => (
                   <button
-                    key={t}
-                    className={type === t ? "on" : ""}
-                    onClick={() => setType(t)}
+                    key={ty}
+                    className={type === ty ? "on" : ""}
+                    onClick={() => setType(ty)}
                     type="button"
                   >
                     <Icon />
-                    <span className="bn">{label}</span>
+                    <span className="bn">{translate(lang, `media.${ty}`)}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="bn">মিডিয়া লিংক (URL)</label>
+              <label className="bn">{t("posting.media_link")}</label>
               <input
                 value={mediaUrl}
                 onChange={(e) => setMediaUrl(e.target.value)}
-                placeholder="https://... (ভিডিওর জন্য সরাসরি .mp4)"
+                placeholder={t("posting.media_ph")}
               />
               <div className="uploader" style={{ marginTop: 10 }}>
                 <IconUpload />
-                <div className="bn">অথবা মিডিয়া আপলোড করুন</div>
+                <div className="bn">{t("posting.upload")}</div>
                 <div style={{ fontSize: 11.5, marginTop: 3 }}>
-                  ভিডিওর জন্য YouTube/Drive লিংক নয় — সরাসরি হোস্টেড .mp4
+                  {t("posting.upload_hint")}
                 </div>
               </div>
             </div>
 
             <div>
               <div className="caption-head">
-                <label className="bn">ক্যাপশন</label>
+                <label className="bn">{t("posting.caption")}</label>
                 <button
                   className="ai-btn"
                   onClick={genCaption}
@@ -176,20 +174,20 @@ export function PostingClient({ posts }: { posts: Post[] }) {
                   type="button"
                 >
                   <IconSparkle />
-                  {aiBusy ? "লিখছে..." : "AI ক্যাপশন"}
+                  {aiBusy ? t("posting.ai_wait") : t("posting.ai")}
                 </button>
               </div>
               <textarea
                 className="bn"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                placeholder="প্রোডাক্ট সম্পর্কে লিখুন, অথবা AI দিয়ে জেনারেট করুন..."
+                placeholder={t("posting.caption_ph")}
               />
             </div>
 
             <div className="row2">
               <div>
-                <label className="bn">শিডিউল তারিখ</label>
+                <label className="bn">{t("posting.date")}</label>
                 <input
                   type="date"
                   value={date}
@@ -197,7 +195,7 @@ export function PostingClient({ posts }: { posts: Post[] }) {
                 />
               </div>
               <div>
-                <label className="bn">সময়</label>
+                <label className="bn">{t("posting.time")}</label>
                 <input
                   type="time"
                   value={time}
@@ -214,7 +212,7 @@ export function PostingClient({ posts }: { posts: Post[] }) {
               type="button"
             >
               <IconSend />
-              {busy ? "সেভ হচ্ছে..." : "পোস্ট শিডিউল করুন"}
+              {busy ? t("posting.saving") : t("posting.schedule")}
             </button>
           </div>
         </div>
@@ -222,17 +220,19 @@ export function PostingClient({ posts }: { posts: Post[] }) {
         <div className="card">
           <div className="card-head">
             <h3 className="bn">
-              শিডিউল করা পোস্ট{" "}
-              <span className="pill-count">{bn(posts.length)} টি</span>
+              {t("posting.scheduled_list")}{" "}
+              <span className="pill-count">
+                {t("count.items", { n: num(posts.length) })}
+              </span>
             </h3>
           </div>
           <div className="tbl-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>পোস্ট</th>
-                  <th>সময়</th>
-                  <th>স্ট্যাটাস</th>
+                  <th>{t("th.post")}</th>
+                  <th>{t("th.time")}</th>
+                  <th>{t("th.status")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -259,26 +259,33 @@ export function PostingClient({ posts }: { posts: Post[] }) {
                               {p.caption}
                             </div>
                             <div className="cell-sub">
-                              {MEDIA_TYPE_BN[p.media_type]} পোস্ট
+                              {t("posting.x_post", {
+                                type: translate(lang, `media.${p.media_type}`),
+                              })}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="cell-sub">
                         {p.scheduled_time
-                          ? bnDateTime(p.scheduled_time)
-                          : "তাৎক্ষণিক"}
+                          ? dateFmt(p.scheduled_time, lang, {
+                              day: "numeric",
+                              month: "short",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })
+                          : t("posting.instant")}
                       </td>
                       <td>
                         <span className={`badge-s s-${p.status}`}>
-                          {STATUS_BN[p.status]}
+                          {translate(lang, `status.${p.status}`)}
                         </span>
                       </td>
                       <td className="row-act">
                         {p.status === "pending" && (
                           <button
                             className="mini"
-                            title="এখনই পোস্ট"
+                            title={t("posting.publish_now")}
                             onClick={() => publishNow(p.id)}
                             disabled={rowBusy === p.id}
                           >
@@ -287,7 +294,7 @@ export function PostingClient({ posts }: { posts: Post[] }) {
                         )}
                         <button
                           className="mini"
-                          title="ডিলিট"
+                          title={t("posting.delete")}
                           onClick={() => delPost(p.id)}
                           disabled={rowBusy === p.id}
                         >
@@ -300,7 +307,7 @@ export function PostingClient({ posts }: { posts: Post[] }) {
                 {posts.length === 0 && (
                   <tr>
                     <td colSpan={4} className="empty bn">
-                      এখনো কোনো পোস্ট নেই — বাঁ পাশ থেকে তৈরি করুন
+                      {t("posting.empty")}
                     </td>
                   </tr>
                 )}
