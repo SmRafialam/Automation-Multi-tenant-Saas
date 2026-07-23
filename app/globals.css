@@ -101,6 +101,13 @@ a { color: inherit; text-decoration: none; }
 .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 .oauth { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 11px; font-weight: 600; font-size: 14px; transition: 0.18s; }
 .oauth:hover { background: var(--surface-2); }
+
+/* Language switcher (segmented, shows both languages) */
+.lang-seg { display: inline-flex; align-items: center; gap: 2px; background: var(--surface-2); border: 1px solid var(--border-soft); border-radius: 10px; padding: 3px 3px 3px 8px; }
+.lang-seg .lang-globe { width: 15px; height: 15px; color: var(--text-faint); margin-right: 4px; flex: none; }
+.lang-seg button { padding: 5px 11px; border-radius: 7px; font-size: 12.5px; font-weight: 700; color: var(--text-faint); border: none; background: none; line-height: 1; transition: 0.15s; }
+.lang-seg button:hover { color: var(--text-dim); }
+.lang-seg button.on { background: var(--accent-grad); color: #04121a; }
 .auth-err { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 11px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
 .auth-note { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #fcd34d; padding: 11px 14px; border-radius: 10px; font-size: 12.5px; margin-bottom: 18px; line-height: 1.5; }
 
